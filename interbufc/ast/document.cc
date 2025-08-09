@@ -6,6 +6,7 @@ INTERBUFC_API Document::Document(peff::Alloc *allocator): allocator(allocator), 
 }
 
 INTERBUFC_API Document::~Document() {
+	rootModule.reset();
 	_doClearDeferredDestructibleAstNodes();
 }
 

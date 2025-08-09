@@ -116,6 +116,7 @@ namespace interbufc {
 		EnumKeyword,
 		ImportKeyword,
 		ModuleKeyword,
+		StructKeyword,
 
 		I8TypeName,
 		I16TypeName,

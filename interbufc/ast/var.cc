@@ -28,10 +28,6 @@ INTERBUFC_API VarNode::VarNode(const VarNode &rhs, peff::Alloc *allocator, bool 
 		return;
 	}
 
-	isTypeDeducedFromInitialValue = rhs.isTypeDeducedFromInitialValue;
-	isTypeSealed = rhs.isTypeSealed;
-	idxReg = rhs.idxReg;
-
 	succeededOut = true;
 }
 

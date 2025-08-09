@@ -155,9 +155,7 @@ namespace interbufc {
 
 		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseTypeName(AstNodePtr<TypeNameNode> &typeNameOut, bool withCircumfixes);
 
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseClassStmts();
-
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseClassMember();
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseVarField(AstNodePtr<VarNode> &varNodeOut);
 		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseProgramStmt();
 
 		/// @brief Parse a whole program.

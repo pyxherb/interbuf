@@ -1,0 +1,9 @@
+struct Position {
+	line: u32,
+	column: u32
+}
+
+struct Location {
+	begin: Position,
+	end: Position
+}

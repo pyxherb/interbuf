@@ -182,6 +182,8 @@ INTERBUFC_API const char *interbufc::getTokenName(TokenId tokenId) {
 			return "import";
 		case TokenId::ModuleKeyword:
 			return "module";
+		case TokenId::StructKeyword:
+			return "struct";
 		case TokenId::I8TypeName:
 			return "i8";
 		case TokenId::I16TypeName:

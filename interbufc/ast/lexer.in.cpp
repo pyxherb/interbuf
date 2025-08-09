@@ -84,6 +84,7 @@ INTERBUFC_API std::optional<LexicalError> Lexer::lex(const std::string_view &src
 				<InitialCondition>"enum"		{ token->tokenId = TokenId::EnumKeyword; break; }
 				<InitialCondition>"import"		{ token->tokenId = TokenId::ImportKeyword; break; }
 				<InitialCondition>"module"		{ token->tokenId = TokenId::ModuleKeyword; break; }
+				<InitialCondition>"struct"		{ token->tokenId = TokenId::StructKeyword; break; }
 
 				<InitialCondition>"i8"			{ token->tokenId = TokenId::I8TypeName; break; }
 				<InitialCondition>"i16"			{ token->tokenId = TokenId::I16TypeName; break; }

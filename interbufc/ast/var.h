@@ -11,10 +11,7 @@ namespace interbufc {
 		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
 
 	public:
-		bool isTypeDeducedFromInitialValue = false;
 		AstNodePtr<TypeNameNode> type;
-		bool isTypeSealed = false;
-		uint32_t idxReg = UINT32_MAX;
 
 		INTERBUFC_API VarNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
 		INTERBUFC_API VarNode(const VarNode &rhs, peff::Alloc *allocator, bool &succeededOut);

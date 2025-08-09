@@ -83,25 +83,7 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseIdRef(IdRefPtr &idRefOut) 
 	return {};
 }
 
-INTERBUFC_API std::optional<SyntaxError> Parser::parseClassStmts() {
-	std::optional<SyntaxError> syntaxError;
-
-	Token *t;
-
-	while ((t = peekToken())->tokenId != TokenId::RBrace) {
-		if ((syntaxError = parseProgramStmt())) {
-			// Parse the rest to make sure that we have gained all of the information,
-			// instead of ignoring them.
-			if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
-				return genOutOfMemoryError();
-			syntaxError.reset();
-		}
-	}
-
-	return {};
-}
-
-INTERBUFC_API std::optional<SyntaxError> Parser::parseClassMember() {
+INTERBUFC_API std::optional<SyntaxError> Parser::parseVarField(AstNodePtr<VarNode> &varNodeOut) {
 	std::optional<SyntaxError> syntaxError;
 
 	Token *token = peekToken();
@@ -113,6 +95,14 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseClassMember() {
 	if ((syntaxError = expectToken((nameToken = peekToken()), TokenId::Id)))
 		return syntaxError;
 
+	if (!(varNodeOut = makeAstNode<VarNode>(resourceAllocator.get(), resourceAllocator.get(), document))) {
+		return genOutOfMemoryError();
+	}
+
+	peff::ScopeGuard setTokenRangeGuard([this, token, varNodeOut]() noexcept {
+		varNodeOut->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
+	});
+
 	Token *colonToken;
 
 	if ((syntaxError = expectToken((colonToken = peekToken()), TokenId::Colon)))
@@ -120,7 +110,7 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseClassMember() {
 
 	peff::SharedPtr<TypeNameNode> typeName;
 
-	if ((syntaxError = parseTypeName(typeName, true)))
+	if ((syntaxError = parseTypeName(varNodeOut->type, true)))
 		return syntaxError;
 
 	return {};
@@ -167,13 +157,6 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 					classNode->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
 				});
 
-				AstNodePtr<MemberNode> prevParent;
-				prevParent = curParent;
-				peff::ScopeGuard restorePrevModGuard([this, prevParent]() noexcept {
-					curParent = prevParent;
-				});
-				curParent = classNode.castTo<MemberNode>();
-
 				Token *lBraceToken;
 
 				if ((syntaxError = expectToken((lBraceToken = peekToken()), TokenId::LBrace))) {
@@ -183,21 +166,54 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 				nextToken();
 
 				Token *currentToken;
-				while (true) {
-					if ((syntaxError = expectToken(currentToken = peekToken()))) {
-						return syntaxError;
-					}
-					if (currentToken->tokenId == TokenId::RBrace) {
-						break;
-					}
+				peff::SharedPtr<VarNode> memberField;
+				for(;;) {
+					if ((syntaxError = parseVarField(memberField))) {
+						size_t idxVarMember;
 
-					if ((syntaxError = parseProgramStmt())) {
+						if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
+							return genOutOfMemoryError();
+						}
+
 						// Parse the rest to make sure that we have gained all of the information,
 						// instead of ignoring them.
 						if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
 							return genOutOfMemoryError();
 						syntaxError.reset();
 					}
+
+					size_t idxVarMember;
+
+					if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
+						return genOutOfMemoryError();
+					}
+
+					if (auto it = p->memberIndices.find(memberField->name); it != p->memberIndices.end()) {
+						peff::String s(resourceAllocator.get());
+
+						if (!s.build(memberField->name)) {
+							return genOutOfMemoryError();
+						}
+
+						ConflictingDefinitionsErrorExData exData(std::move(s));
+
+						return SyntaxError(memberField->tokenRange, std::move(exData));
+					} else {
+						if (!(p->indexMember(idxVarMember))) {
+							return genOutOfMemoryError();
+						}
+					}
+
+					if (!classNode->addMember(memberField.castTo<MemberNode>()))
+						return genOutOfMemoryError();
+
+					Token *commaToken;
+
+					if ((commaToken = peekToken())->tokenId != TokenId::Comma) {
+						break;
+					}
+
+					nextToken();
 				}
 
 				Token *rBraceToken;
@@ -219,6 +235,125 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 				ConflictingDefinitionsErrorExData exData(std::move(s));
 
 				return SyntaxError(classNode->tokenRange, std::move(exData));
+			} else {
+				if (!(p->indexMember(idxMember))) {
+					return genOutOfMemoryError();
+				}
+			}
+
+			break;
+		}
+		case TokenId::StructKeyword: {
+			// Struct.
+			nextToken();
+
+			AstNodePtr<StructNode> structNode;
+
+			if (!(structNode = makeAstNode<StructNode>(resourceAllocator.get(), resourceAllocator.get(), document))) {
+				return genOutOfMemoryError();
+			}
+
+			Token *nameToken;
+
+			if ((syntaxError = expectToken((nameToken = peekToken()), TokenId::Id))) {
+				return syntaxError;
+			}
+
+			size_t idxMember;
+
+			if ((idxMember = p->pushMember(structNode.castTo<MemberNode>())) == SIZE_MAX) {
+				return genOutOfMemoryError();
+			}
+
+			nextToken();
+
+			if (!structNode->name.build(nameToken->sourceText)) {
+				return genOutOfMemoryError();
+			}
+
+			{
+				peff::ScopeGuard setTokenRangeGuard([this, token, structNode]() noexcept {
+					structNode->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
+				});
+
+				Token *lBraceToken;
+
+				if ((syntaxError = expectToken((lBraceToken = peekToken()), TokenId::LBrace))) {
+					return syntaxError;
+				}
+
+				nextToken();
+
+				Token *currentToken;
+				peff::SharedPtr<VarNode> memberField;
+				for (;;) {
+					if ((syntaxError = parseVarField(memberField))) {
+						size_t idxVarMember;
+
+						if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
+							return genOutOfMemoryError();
+						}
+
+						// Parse the rest to make sure that we have gained all of the information,
+						// instead of ignoring them.
+						if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
+							return genOutOfMemoryError();
+						syntaxError.reset();
+					}
+
+					size_t idxVarMember;
+
+					if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
+						return genOutOfMemoryError();
+					}
+
+					if (auto it = p->memberIndices.find(memberField->name); it != p->memberIndices.end()) {
+						peff::String s(resourceAllocator.get());
+
+						if (!s.build(memberField->name)) {
+							return genOutOfMemoryError();
+						}
+
+						ConflictingDefinitionsErrorExData exData(std::move(s));
+
+						return SyntaxError(memberField->tokenRange, std::move(exData));
+					} else {
+						if (!(p->indexMember(idxVarMember))) {
+							return genOutOfMemoryError();
+						}
+					}
+
+					if (!structNode->addMember(memberField.castTo<MemberNode>()))
+						return genOutOfMemoryError();
+
+					Token *commaToken;
+
+					if ((commaToken = peekToken())->tokenId != TokenId::Comma) {
+						break;
+					}
+
+					nextToken();
+				}
+
+				Token *rBraceToken;
+
+				if ((syntaxError = expectToken((rBraceToken = peekToken()), TokenId::RBrace))) {
+					return syntaxError;
+				}
+
+				nextToken();
+			}
+
+			if (auto it = p->memberIndices.find(structNode->name); it != p->memberIndices.end()) {
+				peff::String s(resourceAllocator.get());
+
+				if (!s.build(structNode->name)) {
+					return genOutOfMemoryError();
+				}
+
+				ConflictingDefinitionsErrorExData exData(std::move(s));
+
+				return SyntaxError(structNode->tokenRange, std::move(exData));
 			} else {
 				if (!(p->indexMember(idxMember))) {
 					return genOutOfMemoryError();
