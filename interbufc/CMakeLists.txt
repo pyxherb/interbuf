@@ -14,6 +14,7 @@ set_target_properties(interbufc PROPERTIES
 )
 
 add_subdirectory("ast")
+add_subdirectory("comp")
 
 install(TARGETS interbufc
     EXPORT interbufTargets
