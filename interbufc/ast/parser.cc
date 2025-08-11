@@ -95,9 +95,14 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseVarField(AstNodePtr<VarNod
 	if ((syntaxError = expectToken((nameToken = peekToken()), TokenId::Id)))
 		return syntaxError;
 
+	nextToken();
+
 	if (!(varNodeOut = makeAstNode<VarNode>(resourceAllocator.get(), resourceAllocator.get(), document))) {
 		return genOutOfMemoryError();
 	}
+
+	if (!varNodeOut->name.build(nameToken->sourceText))
+		return genOutOfMemoryError();
 
 	peff::ScopeGuard setTokenRangeGuard([this, token, varNodeOut]() noexcept {
 		varNodeOut->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
@@ -107,6 +112,8 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseVarField(AstNodePtr<VarNod
 
 	if ((syntaxError = expectToken((colonToken = peekToken()), TokenId::Colon)))
 		return syntaxError;
+
+	nextToken();
 
 	peff::SharedPtr<TypeNameNode> typeName;
 
