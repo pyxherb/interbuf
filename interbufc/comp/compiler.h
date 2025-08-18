@@ -18,11 +18,19 @@ namespace interbufc {
 	class Compiler {
 	public:
 		peff::DynArray<CompilationError> errors;
+		peff::DynArray<CompilationWarning> warnings;
 
 		INTERBUFC_API virtual ~Compiler();
 
 		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<CompilationError> pushError(CompilationError &&error) noexcept {
 			if (!errors.pushBack(std::move(error)))
+				return genOutOfMemoryCompError();
+
+			return {};
+		}
+
+		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<CompilationError> pushWarning(CompilationWarning &&warning) noexcept {
+			if (!warnings.pushBack(std::move(warning)))
 				return genOutOfMemoryCompError();
 
 			return {};
