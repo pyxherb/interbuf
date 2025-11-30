@@ -114,9 +114,11 @@ namespace interbufc {
 		AsKeyword,
 		ClassKeyword,
 		EnumKeyword,
+		FalseKeyword,
 		ImportKeyword,
 		ModuleKeyword,
 		StructKeyword,
+		TrueKeyword,
 
 		I8TypeName,
 		I16TypeName,

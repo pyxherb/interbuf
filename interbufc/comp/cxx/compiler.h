@@ -4,13 +4,12 @@
 #include "../compiler.h"
 
 namespace interbufc {
-	class CXXCompiler {
+	class CXXCompiler : public Compiler {
 	public:
 		INTERBUFC_API virtual ~CXXCompiler();
 
 		INTERBUFC_API virtual std::optional<CompilationError> compile(
-			CompilerWriter *writer,
-			AstNodePtr<ModuleNode> mod) = 0;
+			AstNodePtr<ModuleNode> mod) override;
 	};
 }
 

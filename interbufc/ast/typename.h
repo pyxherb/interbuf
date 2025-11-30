@@ -94,26 +94,6 @@ namespace interbufc {
 		INTERBUFC_API virtual ~U64TypeNameNode();
 	};
 
-	class ISizeTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		INTERBUFC_API ISizeTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API ISizeTypeNameNode(const ISizeTypeNameNode &rhs, peff::Alloc *selfAllocator);
-		INTERBUFC_API virtual ~ISizeTypeNameNode();
-	};
-
-	class USizeTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		INTERBUFC_API USizeTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API USizeTypeNameNode(const USizeTypeNameNode &rhs, peff::Alloc *selfAllocator);
-		INTERBUFC_API virtual ~USizeTypeNameNode();
-	};
-
 	class F32TypeNameNode : public TypeNameNode {
 	protected:
 		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
@@ -154,16 +134,6 @@ namespace interbufc {
 		INTERBUFC_API virtual ~BoolTypeNameNode();
 	};
 
-	class ObjectTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		INTERBUFC_API ObjectTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API ObjectTypeNameNode(const ObjectTypeNameNode &rhs, peff::Alloc *selfAllocator);
-		INTERBUFC_API virtual ~ObjectTypeNameNode();
-	};
-
 	class AnyTypeNameNode : public TypeNameNode {
 	protected:
 		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
@@ -190,18 +160,6 @@ namespace interbufc {
 		INTERBUFC_API virtual ~CustomTypeNameNode();
 	};
 
-	class UnpackingTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		AstNodePtr<TypeNameNode> innerTypeName;
-
-		INTERBUFC_API UnpackingTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API UnpackingTypeNameNode(const UnpackingTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut);
-		INTERBUFC_API virtual ~UnpackingTypeNameNode();
-	};
-
 	class ArrayTypeNameNode : public TypeNameNode {
 	protected:
 		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
@@ -212,85 +170,6 @@ namespace interbufc {
 		INTERBUFC_API ArrayTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document, const AstNodePtr<TypeNameNode> &elementType);
 		INTERBUFC_API ArrayTypeNameNode(const ArrayTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut);
 		INTERBUFC_API virtual ~ArrayTypeNameNode();
-	};
-
-	class FnTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		AstNodePtr<TypeNameNode> returnType;
-		AstNodePtr<TypeNameNode> thisType;
-		peff::DynArray<AstNodePtr<TypeNameNode>> paramTypes;
-		bool hasVarArgs = false;
-		bool isForAdl = false;
-
-		INTERBUFC_API FnTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API FnTypeNameNode(const FnTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut);
-		INTERBUFC_API virtual ~FnTypeNameNode();
-	};
-
-	class RefTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		AstNodePtr<TypeNameNode> referencedType;
-
-		INTERBUFC_API RefTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document, const AstNodePtr<TypeNameNode> &referencedType);
-		INTERBUFC_API RefTypeNameNode(const RefTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut);
-		INTERBUFC_API virtual ~RefTypeNameNode();
-	};
-
-	class TempRefTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		AstNodePtr<TypeNameNode> referencedType;
-
-		INTERBUFC_API TempRefTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document, const AstNodePtr<TypeNameNode> &referencedType);
-		INTERBUFC_API TempRefTypeNameNode(const TempRefTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut);
-		INTERBUFC_API virtual ~TempRefTypeNameNode();
-	};
-
-	class ParamTypeListTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		peff::DynArray<AstNodePtr<TypeNameNode>> paramTypes;
-		bool hasVarArgs = false;
-
-		INTERBUFC_API ParamTypeListTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API ParamTypeListTypeNameNode(const ParamTypeListTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut);
-		INTERBUFC_API virtual ~ParamTypeListTypeNameNode();
-	};
-
-	class UnpackedParamsTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		peff::DynArray<AstNodePtr<TypeNameNode>> paramTypes;
-		bool hasVarArgs = false;
-
-		INTERBUFC_API UnpackedParamsTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API UnpackedParamsTypeNameNode(const UnpackedParamsTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut);
-		INTERBUFC_API virtual ~UnpackedParamsTypeNameNode();
-	};
-
-	class UnpackedArgsTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		peff::DynArray<AstNodePtr<TypeNameNode>> paramTypes;
-		bool hasVarArgs = false;
-
-		INTERBUFC_API UnpackedArgsTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API UnpackedArgsTypeNameNode(const UnpackedArgsTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut);
-		INTERBUFC_API virtual ~UnpackedArgsTypeNameNode();
 	};
 }
 

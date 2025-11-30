@@ -1,4 +1,4 @@
-#include "ast/parser.h"
+#include "comp/compiler.h"
 #include <initializer_list>
 #include <cstdio>
 #include <cstdlib>
@@ -125,8 +125,6 @@ const ArglessOptionMap g_arglessOptions = {
 
 };
 
-const char *g_modFileName = nullptr, *g_outputFileName = nullptr;
-
 const SingleArgOptionMap g_singleArgOptions = {
 	{ "-I", [](const OptionMatchContext &matchContext, const char *option, const char *arg) -> int {
 		 MatchUserData *userData = ((MatchUserData *)matchContext.userData);
@@ -146,7 +144,7 @@ const SingleArgOptionMap g_singleArgOptions = {
 		 return 0;
 	 } },
 	{ "-o", [](const OptionMatchContext &matchContext, const char *option, const char *arg) -> int {
-		 g_outputFileName = arg;
+		 interbufc::g_outputDirectoryPath = arg;
 
 		 return 0;
 	 } }
@@ -337,12 +335,12 @@ int main(int argc, char *argv[]) {
 		CompiledOptionMap optionMap(
 			peff::getDefaultAlloc(),
 			[](OptionMatchContext &matchContext, const char *option) -> int {
-				if (g_modFileName) {
+				if (interbufc::g_sourceFileName.size()) {
 					printError("Duplicated target file name");
 					return EINVAL;
 				}
 
-				g_modFileName = option;
+				interbufc::g_sourceFileName = option;
 
 				return 0;
 			},
@@ -365,17 +363,17 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (!g_modFileName) {
+	if (interbufc::g_sourceFileName.empty()) {
 		printError("Missing target file name");
 		return EINVAL;
 	}
 
-	if (!g_outputFileName) {
-		printError("Missing output file name");
+	if (interbufc::g_outputDirectoryPath.empty()) {
+		printError("Missing output path");
 		return EINVAL;
 	}
 
-	FILE *fp = fopen(g_modFileName, "rb");
+	FILE *fp = fopen(interbufc::g_sourceFileName.data(), "rb");
 
 	if (!fp) {
 		printError("Error opening the file");

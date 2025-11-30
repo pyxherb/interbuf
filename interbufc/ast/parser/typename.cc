@@ -107,6 +107,15 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseTypeName(AstNodePtr<TypeNa
 			typeNameOut->tokenRange = TokenRange{ t->index };
 			nextToken();
 			break;
+		case TokenId::AnyTypeName:
+			if (!(typeNameOut = makeAstNode<AnyTypeNameNode>(
+					  resourceAllocator.get(),
+					  resourceAllocator.get(), document)
+						.castTo<TypeNameNode>()))
+				return genOutOfMemoryError();
+			typeNameOut->tokenRange = TokenRange{ t->index };
+			nextToken();
+			break;
 		case TokenId::BoolTypeName:
 			if (!(typeNameOut = makeAstNode<BoolTypeNameNode>(
 					  resourceAllocator.get(),
@@ -179,27 +188,5 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseTypeName(AstNodePtr<TypeNa
 	}
 
 end:
-	if (withCircumfixes) {
-		if ((t = peekToken())->tokenId == TokenId::AndOp) {
-			nextToken();
-			if (!(typeNameOut = makeAstNode<RefTypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(),
-					  document,
-					  typeNameOut)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-		} else if ((t = peekToken())->tokenId == TokenId::LAndOp) {
-			nextToken();
-			if (!(typeNameOut = makeAstNode<TempRefTypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(),
-					  document,
-					  typeNameOut)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-		}
-	}
-
 	return {};
 }

@@ -153,6 +153,8 @@ namespace interbufc {
 		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseIdName(peff::String &nameOut);
 		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseIdRef(IdRefPtr &idRefOut);
 
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseExpr(int precedence, AstNodePtr<ExprNode> &exprOut);
+
 		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseTypeName(AstNodePtr<TypeNameNode> &typeNameOut, bool withCircumfixes);
 
 		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseVarField(AstNodePtr<VarNode> &varNodeOut);

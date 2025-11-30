@@ -11,6 +11,7 @@ namespace interbufc {
 
 	enum class CompilationErrorKind : int {
 		OutOfMemory = 0,
+		IO
 	};
 
 	class TypeNameNode;
@@ -48,6 +49,10 @@ namespace interbufc {
 
 	INTERBUFC_FORCEINLINE CompilationError genOutOfMemoryCompError() {
 		return CompilationError(TokenRange{ 0, 0 }, CompilationErrorKind::OutOfMemory);
+	}
+
+	INTERBUFC_FORCEINLINE CompilationError genIOCompError() {
+		return CompilationError(TokenRange{ 0, 0 }, CompilationErrorKind::IO);
 	}
 
 	struct CompilationWarning {

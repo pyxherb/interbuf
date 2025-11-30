@@ -4,22 +4,15 @@
 #include <interbufc/ast/parser.h>
 
 namespace interbufc {
-	class CompilerWriter {
-	public:
-		INTERBUFC_API virtual ~CompilerWriter();
-
-		[[nodisacrd]] virtual bool write(const char *s, size_t len) noexcept = 0;
-
-		[[nodiscard]] bool write(const std::string_view& sv) noexcept {
-			return write(sv.data(), sv.size());
-		}
-	};
+	extern std::string_view g_sourceFileName, g_outputDirectoryPath;
 
 	class Compiler {
 	public:
+		peff::RcObjectPtr<peff::Alloc> allocator;
 		peff::DynArray<CompilationError> errors;
 		peff::DynArray<CompilationWarning> warnings;
 
+		INTERBUFC_API Compiler(peff::Alloc *allocator);
 		INTERBUFC_API virtual ~Compiler();
 
 		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<CompilationError> pushError(CompilationError &&error) noexcept {
@@ -37,9 +30,14 @@ namespace interbufc {
 		}
 
 		[[nodiscard]] virtual std::optional<CompilationError> compile(
-			CompilerWriter *writer,
 			AstNodePtr<ModuleNode> mod) = 0;
 	};
 }
+
+#define INTERBUFC_RETURN_EXCEPT_IF_WRITE_FAILED(allocator, e)         \
+	if (!(e))                                                        \
+		return interbufc::genIOCompError(); \
+	else                                                             \
+		;
 
 #endif

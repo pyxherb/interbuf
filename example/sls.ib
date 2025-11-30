@@ -7,3 +7,20 @@ struct Location {
 	begin: Position,
 	end: Position
 }
+
+enum CompletionItemType : u8 {
+	Var = 0,
+	LocalVar,
+	Param,
+	Fn,
+	Type,
+	GenericParam,
+	Class,
+	Interface,
+	Trait,
+	Module,
+	Enum,
+	EnumConst,
+	File,
+	Keyword
+}
