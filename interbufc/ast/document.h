@@ -11,6 +11,7 @@ namespace interbufc {
 
 	enum class CompilationErrorKind : int {
 		OutOfMemory = 0,
+		ErrorOpeningFile,
 		IO
 	};
 
@@ -18,16 +19,33 @@ namespace interbufc {
 	class ModuleNode;
 	class FnOverloadingNode;
 
+	struct ErrorOpeningFileError {
+		peff::String name;
+
+		INTERBUFC_FORCEINLINE ErrorOpeningFileError(peff::Alloc *allocator) : name(allocator) {}
+		INTERBUFC_FORCEINLINE ErrorOpeningFileError(ErrorOpeningFileError &&rhs) : name(std::move(rhs.name)) {}
+		~ErrorOpeningFileError() = default;
+	};
+
 	struct CompilationError {
 		TokenRange tokenRange;
 		CompilationErrorKind errorKind;
-		std::variant<std::monostate> exData;
+		std::variant<std::monostate, ErrorOpeningFileError> exData;
 
 		INTERBUFC_FORCEINLINE CompilationError(
 			const TokenRange &tokenRange,
 			CompilationErrorKind errorKind)
 			: tokenRange(tokenRange),
 			  errorKind(errorKind) {
+			assert(tokenRange);
+		}
+
+		INTERBUFC_FORCEINLINE CompilationError(
+			const TokenRange &tokenRange,
+			ErrorOpeningFileError &&error)
+			: tokenRange(tokenRange),
+			  errorKind(CompilationErrorKind::ErrorOpeningFile),
+			  exData(std::move(error)) {
 			assert(tokenRange);
 		}
 

@@ -1,3 +1,5 @@
+namespace slkc.sls;
+
 struct Position {
 	line: u32,
 	column: u32
