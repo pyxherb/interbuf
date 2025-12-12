@@ -10,26 +10,13 @@ INTERBUFC_API MemberNode::MemberNode(
 	peff::Alloc *selfAllocator,
 	const AstNodePtr<Document> &document)
 	: AstNode(astNodeType, selfAllocator, document),
-	  name(selfAllocator),
-	  genericArgs(selfAllocator) {
+	  name(selfAllocator) {
 }
 
-INTERBUFC_API MemberNode::MemberNode(const MemberNode &rhs, peff::Alloc *allocator, bool &succeededOut) : AstNode(rhs, allocator), name(allocator), genericArgs(allocator) {
+INTERBUFC_API MemberNode::MemberNode(const MemberNode &rhs, peff::Alloc *allocator, bool &succeededOut) : AstNode(rhs, allocator), name(allocator) {
 	if (!name.build(rhs.name)) {
 		succeededOut = false;
 		return;
-	}
-
-	if (!genericArgs.resize(rhs.genericArgs.size())) {
-		succeededOut = false;
-		return;
-	}
-
-	for (size_t i = 0; i < genericArgs.size(); ++i) {
-		if (!(genericArgs.at(i) = rhs.genericArgs.at(i)->duplicate<TypeNameNode>(allocator))) {
-			succeededOut = false;
-			return;
-		}
 	}
 
 	succeededOut = true;

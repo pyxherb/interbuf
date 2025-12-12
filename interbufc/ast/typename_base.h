@@ -5,8 +5,7 @@
 
 namespace interbufc {
 	enum class TypeNameKind : uint8_t {
-		Void = 0,
-		I8,
+		I8 = 0,
 		I16,
 		I32,
 		I64,
@@ -16,7 +15,7 @@ namespace interbufc {
 		U64,
 		F32,
 		F64,
-		Any,
+		Object,
 		String,
 		Bool,
 		Custom,

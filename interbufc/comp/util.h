@@ -32,6 +32,12 @@ namespace interbufc {
 			return {};
 		}
 
+		INTERBUFC_FORCEINLINE std::optional<CompilationError> write(const std::string_view &s) const {
+			if (!fwrite(s.data(), s.size(), 1, _fp) < 1)
+				return genIOCompError();
+			return {};
+		}
+
 		INTERBUFC_FORCEINLINE void setCFile(FILE *fp) {
 			close();
 			_fp = fp;

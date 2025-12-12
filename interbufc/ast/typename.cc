@@ -236,8 +236,8 @@ INTERBUFC_API BoolTypeNameNode::BoolTypeNameNode(const BoolTypeNameNode &rhs, pe
 INTERBUFC_API BoolTypeNameNode::~BoolTypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> AnyTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<AnyTypeNameNode> duplicatedNode(makeAstNode<AnyTypeNameNode>(newAllocator, *this, newAllocator));
+INTERBUFC_API AstNodePtr<AstNode> ObjectTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
+	AstNodePtr<ObjectTypeNameNode> duplicatedNode(makeAstNode<ObjectTypeNameNode>(newAllocator, *this, newAllocator));
 	if (!duplicatedNode) {
 		return {};
 	}
@@ -245,13 +245,13 @@ INTERBUFC_API AstNodePtr<AstNode> AnyTypeNameNode::doDuplicate(peff::Alloc *newA
 	return duplicatedNode.castTo<AstNode>();
 }
 
-INTERBUFC_API AnyTypeNameNode::AnyTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Any, selfAllocator, document) {
+INTERBUFC_API ObjectTypeNameNode::ObjectTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Object, selfAllocator, document) {
 }
 
-INTERBUFC_API AnyTypeNameNode::AnyTypeNameNode(const AnyTypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API ObjectTypeNameNode::ObjectTypeNameNode(const ObjectTypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
 }
 
-INTERBUFC_API AnyTypeNameNode::~AnyTypeNameNode() {
+INTERBUFC_API ObjectTypeNameNode::~ObjectTypeNameNode() {
 }
 
 INTERBUFC_API AstNodePtr<AstNode> CustomTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {

@@ -135,7 +135,7 @@ namespace interbufc {
 		AutoTypeName,
 		VoidTypeName,
 		ObjectTypeName,
-		AnyTypeName,
+		ObjectTypeName,
 
 		IntLiteral,
 		LongLiteral,

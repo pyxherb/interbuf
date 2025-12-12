@@ -10,7 +10,6 @@ namespace interbufc {
 	public:
 		MemberNode *parent = nullptr;  // DO NOT use WeakPtr because we want to set the parent during the copy constructor is executing.
 		peff::String name;
-		peff::DynArray<AstNodePtr<TypeNameNode>> genericArgs;
 
 		INTERBUFC_API MemberNode(AstNodeType astNodeType, peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
 		INTERBUFC_API MemberNode(const MemberNode &rhs, peff::Alloc *allocator, bool &succeededOut);
@@ -32,6 +31,7 @@ namespace interbufc {
 
 	public:
 		AstNodePtr<Parser> parser;
+		IdRefPtr namespacePath;
 		peff::DynArray<AstNodePtr<MemberNode>> members;
 		peff::HashMap<std::string_view, size_t> memberIndices;
 		peff::DynArray<AstNodePtr<ImportNode>> anonymousImports;

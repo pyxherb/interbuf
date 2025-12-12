@@ -4,16 +4,6 @@
 #include "idref.h"
 
 namespace interbufc {
-	class VoidTypeNameNode : public TypeNameNode {
-	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
-
-	public:
-		INTERBUFC_API VoidTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API VoidTypeNameNode(const VoidTypeNameNode &rhs, peff::Alloc *selfAllocator);
-		INTERBUFC_API virtual ~VoidTypeNameNode();
-	};
-
 	class I8TypeNameNode : public TypeNameNode {
 	protected:
 		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
@@ -134,14 +124,14 @@ namespace interbufc {
 		INTERBUFC_API virtual ~BoolTypeNameNode();
 	};
 
-	class AnyTypeNameNode : public TypeNameNode {
+	class ObjectTypeNameNode : public TypeNameNode {
 	protected:
 		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
 
 	public:
-		INTERBUFC_API AnyTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API AnyTypeNameNode(const AnyTypeNameNode &rhs, peff::Alloc *selfAllocator);
-		INTERBUFC_API virtual ~AnyTypeNameNode();
+		INTERBUFC_API ObjectTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
+		INTERBUFC_API ObjectTypeNameNode(const ObjectTypeNameNode &rhs, peff::Alloc *selfAllocator);
+		INTERBUFC_API virtual ~ObjectTypeNameNode();
 	};
 
 	class MemberNode;
