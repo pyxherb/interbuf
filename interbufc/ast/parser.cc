@@ -153,83 +153,90 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 				return genOutOfMemoryError();
 			}
 
-			nextToken();
-
-			if (!classNode->name.build(nameToken->sourceText)) {
-				return genOutOfMemoryError();
-			}
-
 			{
-				peff::ScopeGuard setTokenRangeGuard([this, token, classNode]() noexcept {
-					classNode->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
+				peff::ScopeGuard restoreParentGuard([originalP = p, &p]() noexcept {
+					p = originalP;
 				});
-
-				Token *lBraceToken;
-
-				if ((syntaxError = expectToken((lBraceToken = peekToken()), TokenId::LBrace))) {
-					return syntaxError;
-				}
+				p = classNode.castTo<ModuleNode>();
 
 				nextToken();
 
-				Token *currentToken;
-				peff::SharedPtr<VarNode> memberField;
-				for(;;) {
-					if ((syntaxError = parseVarField(memberField))) {
+				if (!classNode->name.build(nameToken->sourceText)) {
+					return genOutOfMemoryError();
+				}
+
+				{
+					peff::ScopeGuard setTokenRangeGuard([this, token, classNode]() noexcept {
+						classNode->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
+					});
+
+					Token *lBraceToken;
+
+					if ((syntaxError = expectToken((lBraceToken = peekToken()), TokenId::LBrace))) {
+						return syntaxError;
+					}
+
+					nextToken();
+
+					Token *currentToken;
+					peff::SharedPtr<VarNode> memberField;
+					for (;;) {
+						if ((syntaxError = parseVarField(memberField))) {
+							size_t idxVarMember;
+
+							if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
+								return genOutOfMemoryError();
+							}
+
+							// Parse the rest to make sure that we have gained all of the information,
+							// instead of ignoring them.
+							if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
+								return genOutOfMemoryError();
+							syntaxError.reset();
+						}
+
 						size_t idxVarMember;
 
 						if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
 							return genOutOfMemoryError();
 						}
 
-						// Parse the rest to make sure that we have gained all of the information,
-						// instead of ignoring them.
-						if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
-							return genOutOfMemoryError();
-						syntaxError.reset();
-					}
+						if (auto it = p->memberIndices.find(memberField->name); it != p->memberIndices.end()) {
+							peff::String s(resourceAllocator.get());
 
-					size_t idxVarMember;
+							if (!s.build(memberField->name)) {
+								return genOutOfMemoryError();
+							}
 
-					if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
-						return genOutOfMemoryError();
-					}
+							ConflictingDefinitionsErrorExData exData(std::move(s));
 
-					if (auto it = p->memberIndices.find(memberField->name); it != p->memberIndices.end()) {
-						peff::String s(resourceAllocator.get());
-
-						if (!s.build(memberField->name)) {
-							return genOutOfMemoryError();
+							return SyntaxError(memberField->tokenRange, std::move(exData));
+						} else {
+							if (!(p->indexMember(idxVarMember))) {
+								return genOutOfMemoryError();
+							}
 						}
 
-						ConflictingDefinitionsErrorExData exData(std::move(s));
-
-						return SyntaxError(memberField->tokenRange, std::move(exData));
-					} else {
-						if (!(p->indexMember(idxVarMember))) {
+						if (!classNode->addMember(memberField.castTo<MemberNode>()))
 							return genOutOfMemoryError();
+
+						Token *commaToken;
+
+						if ((commaToken = peekToken())->tokenId != TokenId::Comma) {
+							break;
 						}
+
+						nextToken();
 					}
 
-					if (!classNode->addMember(memberField.castTo<MemberNode>()))
-						return genOutOfMemoryError();
+					Token *rBraceToken;
 
-					Token *commaToken;
-
-					if ((commaToken = peekToken())->tokenId != TokenId::Comma) {
-						break;
+					if ((syntaxError = expectToken((rBraceToken = peekToken()), TokenId::RBrace))) {
+						return syntaxError;
 					}
 
 					nextToken();
 				}
-
-				Token *rBraceToken;
-
-				if ((syntaxError = expectToken((rBraceToken = peekToken()), TokenId::RBrace))) {
-					return syntaxError;
-				}
-
-				nextToken();
 			}
 
 			if (auto it = p->memberIndices.find(classNode->name); it != p->memberIndices.end()) {
@@ -274,81 +281,88 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 
 			nextToken();
 
-			if (!structNode->name.build(nameToken->sourceText)) {
-				return genOutOfMemoryError();
-			}
-
 			{
-				peff::ScopeGuard setTokenRangeGuard([this, token, structNode]() noexcept {
-					structNode->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
+				peff::ScopeGuard restoreParentGuard([originalP = p, &p]() noexcept {
+					p = originalP;
 				});
+				p = structNode.castTo<ModuleNode>();
 
-				Token *lBraceToken;
-
-				if ((syntaxError = expectToken((lBraceToken = peekToken()), TokenId::LBrace))) {
-					return syntaxError;
+				if (!structNode->name.build(nameToken->sourceText)) {
+					return genOutOfMemoryError();
 				}
 
-				nextToken();
+				{
+					peff::ScopeGuard setTokenRangeGuard([this, token, structNode]() noexcept {
+						structNode->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
+					});
 
-				Token *currentToken;
-				peff::SharedPtr<VarNode> memberField;
-				for (;;) {
-					if ((syntaxError = parseVarField(memberField))) {
+					Token *lBraceToken;
+
+					if ((syntaxError = expectToken((lBraceToken = peekToken()), TokenId::LBrace))) {
+						return syntaxError;
+					}
+
+					nextToken();
+
+					Token *currentToken;
+					peff::SharedPtr<VarNode> memberField;
+					for (;;) {
+						if ((syntaxError = parseVarField(memberField))) {
+							size_t idxVarMember;
+
+							if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
+								return genOutOfMemoryError();
+							}
+
+							// Parse the rest to make sure that we have gained all of the information,
+							// instead of ignoring them.
+							if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
+								return genOutOfMemoryError();
+							syntaxError.reset();
+						}
+
 						size_t idxVarMember;
 
 						if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
 							return genOutOfMemoryError();
 						}
 
-						// Parse the rest to make sure that we have gained all of the information,
-						// instead of ignoring them.
-						if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
-							return genOutOfMemoryError();
-						syntaxError.reset();
-					}
+						if (auto it = p->memberIndices.find(memberField->name); it != p->memberIndices.end()) {
+							peff::String s(resourceAllocator.get());
 
-					size_t idxVarMember;
+							if (!s.build(memberField->name)) {
+								return genOutOfMemoryError();
+							}
 
-					if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
-						return genOutOfMemoryError();
-					}
+							ConflictingDefinitionsErrorExData exData(std::move(s));
 
-					if (auto it = p->memberIndices.find(memberField->name); it != p->memberIndices.end()) {
-						peff::String s(resourceAllocator.get());
-
-						if (!s.build(memberField->name)) {
-							return genOutOfMemoryError();
+							return SyntaxError(memberField->tokenRange, std::move(exData));
+						} else {
+							if (!(p->indexMember(idxVarMember))) {
+								return genOutOfMemoryError();
+							}
 						}
 
-						ConflictingDefinitionsErrorExData exData(std::move(s));
-
-						return SyntaxError(memberField->tokenRange, std::move(exData));
-					} else {
-						if (!(p->indexMember(idxVarMember))) {
+						if (!structNode->addMember(memberField.castTo<MemberNode>()))
 							return genOutOfMemoryError();
+
+						Token *commaToken;
+
+						if ((commaToken = peekToken())->tokenId != TokenId::Comma) {
+							break;
 						}
+
+						nextToken();
 					}
 
-					if (!structNode->addMember(memberField.castTo<MemberNode>()))
-						return genOutOfMemoryError();
+					Token *rBraceToken;
 
-					Token *commaToken;
-
-					if ((commaToken = peekToken())->tokenId != TokenId::Comma) {
-						break;
+					if ((syntaxError = expectToken((rBraceToken = peekToken()), TokenId::RBrace))) {
+						return syntaxError;
 					}
 
 					nextToken();
 				}
-
-				Token *rBraceToken;
-
-				if ((syntaxError = expectToken((rBraceToken = peekToken()), TokenId::RBrace))) {
-					return syntaxError;
-				}
-
-				nextToken();
 			}
 
 			if (auto it = p->memberIndices.find(structNode->name); it != p->memberIndices.end()) {
@@ -393,108 +407,115 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 
 			nextToken();
 
-			if (!enumNode->name.build(nameToken->sourceText)) {
-				return genOutOfMemoryError();
-			}
-
 			{
-				peff::ScopeGuard setTokenRangeGuard([this, token, enumNode]() noexcept {
-					enumNode->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
+				peff::ScopeGuard restoreParentGuard([originalP = p, &p]() noexcept {
+					p = originalP;
 				});
+				p = enumNode.castTo<ModuleNode>();
 
-				Token *colonToken;
-
-				if ((syntaxError = expectToken((colonToken = peekToken()), TokenId::Colon))) {
-					return syntaxError;
+				if (!enumNode->name.build(nameToken->sourceText)) {
+					return genOutOfMemoryError();
 				}
 
-				nextToken();
+				{
+					peff::ScopeGuard setTokenRangeGuard([this, token, enumNode]() noexcept {
+						enumNode->tokenRange = TokenRange{ token->index, parseContext.idxPrevToken };
+					});
 
-				if ((syntaxError = parseTypeName(enumNode->baseType, false))) {
-					return syntaxError;
-				}
+					Token *colonToken;
 
-				Token *lBraceToken;
-
-				if ((syntaxError = expectToken((lBraceToken = peekToken()), TokenId::LBrace))) {
-					return syntaxError;
-				}
-
-				nextToken();
-
-				peff::SharedPtr<EnumItemNode> memberField;
-				for (;;) {
-					size_t idxBeginToken = parseContext.idxPrevToken;
-					if (!(memberField = makeAstNode<EnumItemNode>(resourceAllocator.get(), resourceAllocator.get(), document))) {
-						return genOutOfMemoryError();
+					if ((syntaxError = expectToken((colonToken = peekToken()), TokenId::Colon))) {
+						return syntaxError;
 					}
 
-					{
-						peff::ScopeGuard setEnumFieldTokenRangeGuard([this, token, memberField, idxBeginToken]() noexcept {
-							memberField->tokenRange = TokenRange{ idxBeginToken, parseContext.idxPrevToken };
-						});
+					nextToken();
 
-						Token *fieldNameToken;
+					if ((syntaxError = parseTypeName(enumNode->baseType, false))) {
+						return syntaxError;
+					}
 
-						if ((syntaxError = expectToken((fieldNameToken = peekToken()), TokenId::Id)))
-							return syntaxError;
+					Token *lBraceToken;
 
-						nextToken();
+					if ((syntaxError = expectToken((lBraceToken = peekToken()), TokenId::LBrace))) {
+						return syntaxError;
+					}
 
-						if (!memberField->name.build(fieldNameToken->sourceText))
+					nextToken();
+
+					peff::SharedPtr<EnumItemNode> memberField;
+					for (;;) {
+						size_t idxBeginToken = parseContext.idxPrevToken;
+						if (!(memberField = makeAstNode<EnumItemNode>(resourceAllocator.get(), resourceAllocator.get(), document))) {
 							return genOutOfMemoryError();
+						}
 
-						Token *assignToken;
+						{
+							peff::ScopeGuard setEnumFieldTokenRangeGuard([this, token, memberField, idxBeginToken]() noexcept {
+								memberField->tokenRange = TokenRange{ idxBeginToken, parseContext.idxPrevToken };
+							});
 
-						if ((assignToken = peekToken())->tokenId == TokenId::AssignOp) {
+							Token *fieldNameToken;
+
+							if ((syntaxError = expectToken((fieldNameToken = peekToken()), TokenId::Id)))
+								return syntaxError;
+
 							nextToken();
 
-							if ((syntaxError = parseExpr(0, memberField->value)))
-								return syntaxError;
+							if (!memberField->name.build(fieldNameToken->sourceText))
+								return genOutOfMemoryError();
+
+							Token *assignToken;
+
+							if ((assignToken = peekToken())->tokenId == TokenId::AssignOp) {
+								nextToken();
+
+								if ((syntaxError = parseExpr(0, memberField->value)))
+									return syntaxError;
+							}
 						}
-					}
 
-					size_t idxFieldMember;
+						size_t idxFieldMember;
 
-					if ((idxFieldMember = enumNode->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
-						return genOutOfMemoryError();
-					}
-
-					if (auto it = enumNode->memberIndices.find(memberField->name); it != enumNode->memberIndices.end()) {
-						peff::String s(resourceAllocator.get());
-
-						if (!s.build(memberField->name)) {
+						if ((idxFieldMember = enumNode->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
 							return genOutOfMemoryError();
 						}
 
-						ConflictingDefinitionsErrorExData exData(std::move(s));
+						if (auto it = enumNode->memberIndices.find(memberField->name); it != enumNode->memberIndices.end()) {
+							peff::String s(resourceAllocator.get());
 
-						return SyntaxError(memberField->tokenRange, std::move(exData));
-					} else {
-						if (!(enumNode->indexMember(idxFieldMember))) {
-							return genOutOfMemoryError();
+							if (!s.build(memberField->name)) {
+								return genOutOfMemoryError();
+							}
+
+							ConflictingDefinitionsErrorExData exData(std::move(s));
+
+							return SyntaxError(memberField->tokenRange, std::move(exData));
+						} else {
+							if (!(enumNode->indexMember(idxFieldMember))) {
+								return genOutOfMemoryError();
+							}
 						}
+
+						if (!enumNode->addMember(memberField.castTo<MemberNode>()))
+							return genOutOfMemoryError();
+
+						Token *commaToken;
+
+						if ((commaToken = peekToken())->tokenId != TokenId::Comma) {
+							break;
+						}
+
+						nextToken();
 					}
 
-					if (!enumNode->addMember(memberField.castTo<MemberNode>()))
-						return genOutOfMemoryError();
+					Token *rBraceToken;
 
-					Token *commaToken;
-
-					if ((commaToken = peekToken())->tokenId != TokenId::Comma) {
-						break;
+					if ((syntaxError = expectToken((rBraceToken = peekToken()), TokenId::RBrace))) {
+						return syntaxError;
 					}
 
 					nextToken();
 				}
-
-				Token *rBraceToken;
-
-				if ((syntaxError = expectToken((rBraceToken = peekToken()), TokenId::RBrace))) {
-					return syntaxError;
-				}
-
-				nextToken();
 			}
 
 			if (auto it = p->memberIndices.find(enumNode->name); it != p->memberIndices.end()) {

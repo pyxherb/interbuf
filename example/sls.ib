@@ -1,4 +1,4 @@
-namespace slkc.sls;
+// namespace slkc.sls;
 
 struct Position {
 	line: u32,
@@ -25,4 +25,42 @@ enum CompletionItemType : u8 {
 	EnumConst,
 	File,
 	Keyword
+}
+
+class CompletionItem {
+	type: CompletionItemType,
+
+	label: string,
+	details: string,
+	documentations: string,
+	insertText: string,
+
+	isDeprecated: bool
+}
+
+enum SemanticType : u8 {
+	None,		// None
+	Type,		// Type
+	Class,		// Class
+	Enum, 		// Enumeration
+	Interface,	// Interface
+	Struct,		// Struct
+	TypeParam,	// Type parameter
+	Param,		// Parameter
+	Var,		// Variable
+	Property,	// Property
+	EnumMember,	// Enumeration member
+	Fn,			// Function
+	Method,		// Method
+	Keyword,	// Keyword
+	Modifier,	// Modifier
+	Comment,	// Comment
+	String,		// String
+	Number,		// Number
+	Operator	// Operator
+}
+
+struct SemanticToken {
+	pos: Position,
+	length: u32
 }

@@ -6,6 +6,7 @@
 namespace interbufc {
 	class CXXCompiler : public Compiler {
 	public:
+		INTERBUFC_API CXXCompiler(peff::Alloc *allocator);
 		INTERBUFC_API virtual ~CXXCompiler();
 
 		INTERBUFC_API virtual std::optional<CompilationError> compile(

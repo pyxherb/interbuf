@@ -5,7 +5,7 @@
 #include <interbufc/ast/typename.h>
 
 namespace interbufc {
-	extern std::string_view g_sourceFileName, g_outputDirectoryPath, g_outputFileName;
+	extern std::string_view g_language, g_sourceFileName, g_outputDirectoryPath, g_outputFileName;
 
 	class Compiler {
 	public:

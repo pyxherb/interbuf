@@ -92,13 +92,11 @@ INTERBUFC_API ModuleNode::~ModuleNode() {
 }
 
 INTERBUFC_API size_t ModuleNode::pushMember(AstNodePtr<MemberNode> memberNode) noexcept {
-	size_t n = members.size();
-
 	if (!members.pushBack(std::move(memberNode))) {
 		return SIZE_MAX;
 	}
 
-	return n;
+	return members.size() - 1;
 }
 
 INTERBUFC_API bool ModuleNode::addMember(AstNodePtr<MemberNode> memberNode) noexcept {
@@ -125,10 +123,10 @@ INTERBUFC_API bool ModuleNode::indexMember(size_t indexInMemberArray) noexcept {
 
 INTERBUFC_API bool ModuleNode::removeMember(const std::string_view &name) noexcept {
 	size_t index = memberIndices.at(name);
-	if (!members.eraseRange(index, index + 1)) {
+	if (!members.eraseRange(index, index + 1))
 		return false;
-	}
-	memberIndices.remove(name);
+	if (!memberIndices.remove(name))
+		return false;
 	for (auto i : memberIndices) {
 		if (i.second > index) {
 			--i.second;

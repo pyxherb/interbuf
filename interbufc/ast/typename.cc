@@ -2,24 +2,6 @@
 
 using namespace interbufc;
 
-INTERBUFC_API AstNodePtr<AstNode> VoidTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<VoidTypeNameNode> duplicatedNode(makeAstNode<VoidTypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
-		return {};
-	}
-
-	return duplicatedNode.castTo<AstNode>();
-}
-
-INTERBUFC_API VoidTypeNameNode::VoidTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Void, selfAllocator, document) {
-}
-
-INTERBUFC_API VoidTypeNameNode::VoidTypeNameNode(const VoidTypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
-}
-
-INTERBUFC_API VoidTypeNameNode::~VoidTypeNameNode() {
-}
-
 INTERBUFC_API AstNodePtr<AstNode> I8TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
 	AstNodePtr<I8TypeNameNode> duplicatedNode(makeAstNode<I8TypeNameNode>(newAllocator, *this, newAllocator));
 	if(!duplicatedNode) {

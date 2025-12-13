@@ -1,4 +1,4 @@
-#include "comp/compiler.h"
+#include "comp/comp.h"
 #include <initializer_list>
 #include <cstdio>
 #include <cstdlib>
@@ -126,6 +126,18 @@ const ArglessOptionMap g_arglessOptions = {
 };
 
 const SingleArgOptionMap g_singleArgOptions = {
+	{ "-l", [](const OptionMatchContext &matchContext, const char *option, const char *arg) -> int {
+		 MatchUserData *userData = ((MatchUserData *)matchContext.userData);
+
+		 if (!interbufc::g_language.empty()) {
+			 printError("Language is specified multiple times");
+			 return EINVAL;
+		 }
+
+		 interbufc::g_language = arg;
+
+		 return 0;
+	 } },
 	{ "-I", [](const OptionMatchContext &matchContext, const char *option, const char *arg) -> int {
 		 MatchUserData *userData = ((MatchUserData *)matchContext.userData);
 
@@ -279,6 +291,19 @@ void dumpCompilationError(peff::SharedPtr<interbufc::Parser> parser, const inter
 	switch (error.errorKind) {
 		case interbufc::CompilationErrorKind::OutOfMemory:
 			printError("Error at %zu, %zu: Out of memory\n",
+				beginToken->sourceLocation.beginPosition.line + 1,
+				beginToken->sourceLocation.beginPosition.column + 1);
+			break;
+		case interbufc::CompilationErrorKind::ErrorOpeningFile: {
+			const interbufc::ErrorOpeningFileError &e = std::get<interbufc::ErrorOpeningFileError>(error.exData);
+			printError("Error at %zu, %zu: Error opening file: %s\n",
+				beginToken->sourceLocation.beginPosition.line + 1,
+				beginToken->sourceLocation.beginPosition.column + 1,
+				e.name.data());
+			break;
+		}
+		case interbufc::CompilationErrorKind::IO:
+			printError("Error at %zu, %zu: File I/O error\n",
 				beginToken->sourceLocation.beginPosition.line + 1,
 				beginToken->sourceLocation.beginPosition.column + 1);
 			break;
@@ -441,6 +466,16 @@ int main(int argc, char *argv[]) {
 			return ENOMEM;
 		}*/
 
+		if (interbufc::g_language.empty()) {
+			printError("Language is not specified");
+			return EINVAL;
+		}
+
+		if (interbufc::g_outputDirectoryPath.empty()) {
+			printError("Output directory is not specified");
+			return EINVAL;
+		}
+
 		peff::Uninitialized<interbufc::TokenList> tokenList;
 		{
 			interbufc::Lexer lexer(peff::getDefaultAlloc());
@@ -486,6 +521,25 @@ int main(int argc, char *argv[]) {
 			for (auto &i : parser->syntaxErrors) {
 				encounteredErrors = true;
 				dumpSyntaxError(parser, i);
+			}
+
+			if (interbufc::g_language == "cpp") {
+				interbufc::CXXCompiler compiler(peff::getDefaultAlloc());
+
+				std::optional<interbufc::CompilationError> e = compiler.compile(mod);
+
+				if (e) {
+					encounteredErrors = true;
+					dumpCompilationError(parser, *e, 0);
+				}
+
+				for (auto &i : compiler.errors) {
+					encounteredErrors = true;
+					dumpCompilationError(parser, i, 0);
+				}
+			} else {
+				printError("Unrecognized language");
+				return EINVAL;
 			}
 		}
 	}

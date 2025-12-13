@@ -2,7 +2,7 @@
 
 using namespace interbufc;
 
-std::string_view interbufc::g_sourceFileName, interbufc::g_outputDirectoryPath, interbufc::g_outputFileNamePrefix;
+std::string_view interbufc::g_language, interbufc::g_sourceFileName, interbufc::g_outputDirectoryPath, interbufc::g_outputFileName;
 
 INTERBUFC_API Compiler::Compiler(peff::Alloc *allocator) : warnings(allocator), errors(allocator), allocator(allocator) {
 }

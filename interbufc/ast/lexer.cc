@@ -214,8 +214,6 @@ INTERBUFC_API const char *interbufc::getTokenName(TokenId tokenId) {
 			return "void";
 		case TokenId::ObjectTypeName:
 			return "object";
-		case TokenId::ObjectTypeName:
-			return "any";
 		case TokenId::IntLiteral:
 			return "integer literal";
 		case TokenId::LongLiteral:
