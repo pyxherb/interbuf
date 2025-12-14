@@ -76,10 +76,10 @@ static std::optional<interbufc::CompilationError> _writeTypeName(interbufc::File
 
 			switch (m->astNodeType) {
 				case AstNodeType::Class:
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::ObjectPtr<interbuf::ClassBase>"));
+					break;
 				case AstNodeType::Struct:
-					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::ObjectPtr<"));
-					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
-					INTERBUFC_RETURN_IF_COMP_ERROR(file.write(">"));
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::ObjectPtr<interbuf::StructBase>"));
 					break;
 				case AstNodeType::Enum:
 					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));

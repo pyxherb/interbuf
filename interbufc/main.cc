@@ -523,12 +523,12 @@ int main(int argc, char *argv[]) {
 			bool encounteredErrors = false;
 			if (auto e = parser->parseProgram(mod); e) {
 				encounteredErrors = true;
-				dumpSyntaxError(parser, *e);
+				dumpSyntaxError(parser.get(), *e);
 			}
 
 			for (auto &i : parser->syntaxErrors) {
 				encounteredErrors = true;
-				dumpSyntaxError(parser, i);
+				dumpSyntaxError(parser.get(), i);
 			}
 
 			if (interbufc::g_language == "cpp") {
