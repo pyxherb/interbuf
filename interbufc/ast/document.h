@@ -12,7 +12,9 @@ namespace interbufc {
 	enum class CompilationErrorKind : int {
 		OutOfMemory = 0,
 		ErrorOpeningFile,
-		IO
+		IO,
+		InvalidTypeName,
+		InvalidEnumBaseType
 	};
 
 	class TypeNameNode;

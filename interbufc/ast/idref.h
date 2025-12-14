@@ -10,8 +10,8 @@ namespace interbufc {
 		size_t accessOpTokenIndex = SIZE_MAX, nameTokenIndex = SIZE_MAX, leftAngleBracketTokenIndex = SIZE_MAX, rightAngleBracketTokenIndex = SIZE_MAX;
 		peff::DynArray<size_t> commaTokenIndices;
 
-		INTERBUFC_FORCEINLINE IdRefEntry(peff::Alloc *selfAllocator): name(selfAllocator), commaTokenIndices(selfAllocator) {}
-		INTERBUFC_FORCEINLINE IdRefEntry(IdRefEntry&& rhs): name(std::move(rhs.name)), accessOpTokenIndex(rhs.accessOpTokenIndex), nameTokenIndex(rhs.nameTokenIndex), leftAngleBracketTokenIndex(rhs.leftAngleBracketTokenIndex), rightAngleBracketTokenIndex(rhs.rightAngleBracketTokenIndex), commaTokenIndices(std::move(rhs.commaTokenIndices)) {
+		INTERBUFC_FORCEINLINE IdRefEntry(peff::Alloc *selfAllocator) : name(selfAllocator), commaTokenIndices(selfAllocator) {}
+		INTERBUFC_FORCEINLINE IdRefEntry(IdRefEntry &&rhs) noexcept : name(std::move(rhs.name)), accessOpTokenIndex(rhs.accessOpTokenIndex), nameTokenIndex(rhs.nameTokenIndex), leftAngleBracketTokenIndex(rhs.leftAngleBracketTokenIndex), rightAngleBracketTokenIndex(rhs.rightAngleBracketTokenIndex), commaTokenIndices(std::move(rhs.commaTokenIndices)) {
 		}
 	};
 

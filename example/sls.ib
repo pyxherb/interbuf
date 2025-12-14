@@ -1,4 +1,4 @@
-// namespace slkc.sls;
+module slkc.sls;
 
 struct Position {
 	line: u32,

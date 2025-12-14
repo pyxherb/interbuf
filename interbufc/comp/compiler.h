@@ -33,6 +33,8 @@ namespace interbufc {
 		[[nodiscard]] virtual std::optional<CompilationError> compile(
 			AstNodePtr<ModuleNode> mod) = 0;
 	};
+
+	std::optional<CompilationError> resolveCustomTypeName(AstNodePtr<CustomTypeNameNode> typeName, AstNodePtr<MemberNode> &memberOut);
 }
 
 #define INTERBUFC_RETURN_EXCEPT_IF_WRITE_FAILED(allocator, e)         \

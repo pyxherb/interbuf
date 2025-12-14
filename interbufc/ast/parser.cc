@@ -182,12 +182,6 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 					peff::SharedPtr<VarNode> memberField;
 					for (;;) {
 						if ((syntaxError = parseVarField(memberField))) {
-							size_t idxVarMember;
-
-							if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
-								return genOutOfMemoryError();
-							}
-
 							// Parse the rest to make sure that we have gained all of the information,
 							// instead of ignoring them.
 							if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
@@ -216,9 +210,6 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 								return genOutOfMemoryError();
 							}
 						}
-
-						if (!classNode->addMember(memberField.castTo<MemberNode>()))
-							return genOutOfMemoryError();
 
 						Token *commaToken;
 
@@ -308,12 +299,6 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 					peff::SharedPtr<VarNode> memberField;
 					for (;;) {
 						if ((syntaxError = parseVarField(memberField))) {
-							size_t idxVarMember;
-
-							if ((idxVarMember = p->pushMember(memberField.castTo<MemberNode>())) == SIZE_MAX) {
-								return genOutOfMemoryError();
-							}
-
 							// Parse the rest to make sure that we have gained all of the information,
 							// instead of ignoring them.
 							if (!syntaxErrors.pushBack(std::move(syntaxError.value())))
@@ -342,9 +327,6 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 								return genOutOfMemoryError();
 							}
 						}
-
-						if (!structNode->addMember(memberField.castTo<MemberNode>()))
-							return genOutOfMemoryError();
 
 						Token *commaToken;
 
@@ -596,14 +578,13 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 	return {};
 }
 
-INTERBUFC_API std::optional<SyntaxError> Parser::parseProgram(const AstNodePtr<ModuleNode> &initialMod, IdRefPtr &moduleNameOut) {
+INTERBUFC_API std::optional<SyntaxError> Parser::parseProgram(const AstNodePtr<ModuleNode> &initialMod) {
 	std::optional<SyntaxError> syntaxError;
 
 	Token *t;
 
 	curParent = initialMod.castTo<MemberNode>();
 
-	moduleNameOut = {};
 	if ((t = peekToken())->tokenId == TokenId::ModuleKeyword) {
 		nextToken();
 
@@ -621,7 +602,7 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgram(const AstNodePtr<M
 		}
 		nextToken();
 
-		moduleNameOut = std::move(moduleName);
+		initialMod->namespacePath = std::move(moduleName);
 	}
 
 	while ((t = peekToken())->tokenId != TokenId::End) {

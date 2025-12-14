@@ -66,9 +66,29 @@ static std::optional<interbufc::CompilationError> _writeTypeName(interbufc::File
 		case TypeNameKind::Bool:
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("bool"));
 			break;
-		case TypeNameKind::Custom:
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
+		case TypeNameKind::Custom: {
+			AstNodePtr<MemberNode> m;
+
+			INTERBUFC_RETURN_IF_COMP_ERROR(resolveCustomTypeName(typeName.castTo<CustomTypeNameNode>(), m));
+
+			if (!m)
+				return CompilationError(typeName->tokenRange, CompilationErrorKind::InvalidTypeName);
+
+			switch (m->astNodeType) {
+				case AstNodeType::Class:
+				case AstNodeType::Struct:
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::ObjectPtr<"));
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write(">"));
+					break;
+				case AstNodeType::Enum:
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
+					break;
+				default:
+					std::terminate();
+			}
 			break;
+		}
 		default:
 			std::terminate();
 	}
@@ -158,8 +178,48 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 	//
 	for (size_t i = 0; i < namespaceScopes; ++i) {
 		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, i));
-		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("namespace {"));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("namespace "));
 		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(mod->namespacePath->entries.at(i).name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("{\n"));
+	}
+
+	for (size_t i = 0; i < enums.size(); ++i) {
+		AstNodePtr<EnumNode> curEnum = mod->members.at(enums.at(i)).castTo<EnumNode>();
+
+		switch (curEnum->baseType->typeNameKind) {
+			case TypeNameKind::I8:
+			case TypeNameKind::I16:
+			case TypeNameKind::I32:
+			case TypeNameKind::I64:
+			case TypeNameKind::U8:
+			case TypeNameKind::U16:
+			case TypeNameKind::U32:
+			case TypeNameKind::U64:
+			case TypeNameKind::F32:
+			case TypeNameKind::F64:
+			case TypeNameKind::Bool: {
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("enum "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curEnum->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" {\n"));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("};\n"));
+				break;
+			}
+			case TypeNameKind::String: {
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("using "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curEnum->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" = peff::String\n"));
+				break;
+			}
+			case TypeNameKind::Custom:
+				return CompilationError(curEnum->baseType->tokenRange, CompilationErrorKind::InvalidEnumBaseType);
+			default:
+				std::terminate();
+		}
 	}
 
 	for (size_t i = 0; i < structs.size(); ++i) {
@@ -178,7 +238,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
 
-			_writeTypeName(headerFileOut, curVar->type);
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeName(headerFileOut, curVar->type));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curVar->name));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
@@ -190,7 +250,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 	}
 
 	for (size_t i = 0; i < classes.size(); ++i) {
-		AstNodePtr<ClassNode> curClass = mod->members.at(structs.at(i)).castTo<ClassNode>();
+		AstNodePtr<ClassNode> curClass = mod->members.at(classes.at(i)).castTo<ClassNode>();
 
 		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
 
@@ -205,7 +265,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
 
-			_writeTypeName(headerFileOut, curVar->type);
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeName(headerFileOut, curVar->type));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curVar->name));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
@@ -216,13 +276,9 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("};\n"));
 	}
 
-	for (size_t i = 0; i < enums.size(); ++i) {
-		AstNodePtr<EnumNode> curEnum = mod->members.at(structs.at(i)).castTo<EnumNode>();
-	}
-
 	for (size_t i = 0; i < namespaceScopes; ++i) {
-		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, i));
-		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("}"));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, namespaceScopes - i - 1));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("}\n"));
 	}
 
 	return {};

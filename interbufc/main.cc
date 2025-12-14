@@ -307,6 +307,16 @@ void dumpCompilationError(peff::SharedPtr<interbufc::Parser> parser, const inter
 				beginToken->sourceLocation.beginPosition.line + 1,
 				beginToken->sourceLocation.beginPosition.column + 1);
 			break;
+		case interbufc::CompilationErrorKind::InvalidEnumBaseType:
+			printError("Error at %zu, %zu: Invalid base type for enumeration\n",
+				beginToken->sourceLocation.beginPosition.line + 1,
+				beginToken->sourceLocation.beginPosition.column + 1);
+			break;
+		case interbufc::CompilationErrorKind::InvalidTypeName:
+			printError("Error at %zu, %zu: Invalid type name\n",
+				beginToken->sourceLocation.beginPosition.line + 1,
+				beginToken->sourceLocation.beginPosition.column + 1);
+			break;
 		default:
 			printError("Error at %zu, %zu: Unknown error (%d)\n",
 				beginToken->sourceLocation.beginPosition.line + 1,
@@ -504,8 +514,6 @@ int main(int argc, char *argv[]) {
 			}
 			document->rootModule = rootMod;
 
-			interbufc::IdRefPtr moduleName;
-
 			interbufc::AstNodePtr<interbufc::ModuleNode> mod(peff::makeSharedWithControlBlock<interbufc::ModuleNode, interbufc::AstNodeControlBlock<interbufc::ModuleNode>>(peff::getDefaultAlloc(), peff::getDefaultAlloc(), document));
 			if (!(mod = peff::makeSharedWithControlBlock<interbufc::ModuleNode, interbufc::AstNodeControlBlock<interbufc::ModuleNode>>(peff::getDefaultAlloc(), peff::getDefaultAlloc(), document))) {
 				printError("Error allocating memory for the target module");
@@ -513,7 +521,7 @@ int main(int argc, char *argv[]) {
 			}
 
 			bool encounteredErrors = false;
-			if (auto e = parser->parseProgram(mod, moduleName); e) {
+			if (auto e = parser->parseProgram(mod); e) {
 				encounteredErrors = true;
 				dumpSyntaxError(parser, *e);
 			}

@@ -163,7 +163,7 @@ namespace interbufc {
 		/// @brief Parse a whole program.
 		/// @return The syntax error that forced the parser to interrupt the parse progress.
 		/// @note Don't forget that there still may be syntax errors emitted even the parse progress is not interrupted.
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseProgram(const AstNodePtr<ModuleNode> &initialMod, IdRefPtr &moduleNameOut);
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseProgram(const AstNodePtr<ModuleNode> &initialMod);
 	};
 }
 
