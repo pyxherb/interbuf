@@ -1,5 +1,6 @@
 #include "compiler.h"
 #include <interbufc/comp/util.h>
+#include <cctype>
 
 using namespace interbufc;
 
@@ -11,7 +12,7 @@ INTERBUFC_API CXXCompiler::~CXXCompiler() {
 
 static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent);
 static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &file, IdRef *idRef);
-static std::optional<interbufc::CompilationError> _writeTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
+static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
 
 static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent) {
 	for (size_t i = 0; i < indent; ++i)
@@ -28,7 +29,7 @@ static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &f
 	return {};
 };
 
-static std::optional<interbufc::CompilationError> _writeTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
+static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
 	switch (typeName->typeNameKind) {
 		case TypeNameKind::I8:
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int8_t"));
@@ -81,6 +82,136 @@ static std::optional<interbufc::CompilationError> _writeTypeName(interbufc::File
 				case AstNodeType::Struct:
 					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::ObjectPtr<interbuf::StructBase>"));
 					break;
+				case AstNodeType::Enum:
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
+					break;
+				default:
+					std::terminate();
+			}
+			break;
+		}
+		default:
+			std::terminate();
+	}
+	return {};
+}
+
+static std::optional<interbufc::CompilationError> _writeStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
+	switch (typeName->typeNameKind) {
+		case TypeNameKind::I8:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int8_t"));
+			break;
+		case TypeNameKind::I16:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int16_t"));
+			break;
+		case TypeNameKind::I32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int32_t"));
+			break;
+		case TypeNameKind::I64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int64_t"));
+			break;
+		case TypeNameKind::U8:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("uint8_t"));
+			break;
+		case TypeNameKind::U16:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("uint16_t"));
+			break;
+		case TypeNameKind::U32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("uint32_t"));
+			break;
+		case TypeNameKind::U64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("uint64_t"));
+			break;
+		case TypeNameKind::F32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("float"));
+			break;
+		case TypeNameKind::F64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("double"));
+			break;
+		case TypeNameKind::String:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("peff::String"));
+			break;
+		case TypeNameKind::Bool:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("bool"));
+			break;
+		case TypeNameKind::Custom: {
+			AstNodePtr<MemberNode> m;
+
+			INTERBUFC_RETURN_IF_COMP_ERROR(resolveCustomTypeName(typeName.castTo<CustomTypeNameNode>(), m));
+
+			if (!m)
+				return CompilationError(typeName->tokenRange, CompilationErrorKind::InvalidTypeName);
+
+			switch (m->astNodeType) {
+				case AstNodeType::Class:
+				case AstNodeType::Struct:
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::ObjectPtr<"));
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write(">"));
+					break;
+				case AstNodeType::Enum:
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
+					break;
+				default:
+					std::terminate();
+			}
+			break;
+		}
+		default:
+			std::terminate();
+	}
+	return {};
+}
+
+static std::optional<interbufc::CompilationError> _writeDirectTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
+	switch (typeName->typeNameKind) {
+		case TypeNameKind::I8:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int8_t"));
+			break;
+		case TypeNameKind::I16:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int16_t"));
+			break;
+		case TypeNameKind::I32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int32_t"));
+			break;
+		case TypeNameKind::I64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("int64_t"));
+			break;
+		case TypeNameKind::U8:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("uint8_t"));
+			break;
+		case TypeNameKind::U16:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("uint16_t"));
+			break;
+		case TypeNameKind::U32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("uint32_t"));
+			break;
+		case TypeNameKind::U64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("uint64_t"));
+			break;
+		case TypeNameKind::F32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("float"));
+			break;
+		case TypeNameKind::F64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("double"));
+			break;
+		case TypeNameKind::String:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("peff::String"));
+			break;
+		case TypeNameKind::Bool:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("bool"));
+			break;
+		case TypeNameKind::Custom: {
+			AstNodePtr<MemberNode> m;
+
+			INTERBUFC_RETURN_IF_COMP_ERROR(resolveCustomTypeName(typeName.castTo<CustomTypeNameNode>(), m));
+
+			if (!m)
+				return CompilationError(typeName->tokenRange, CompilationErrorKind::InvalidTypeName);
+
+			switch (m->astNodeType) {
+				case AstNodeType::Class:
+				case AstNodeType::Struct:
 				case AstNodeType::Enum:
 					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
 					break;
@@ -222,6 +353,32 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 		}
 	}
 
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
+	for (size_t i = 0; i < structs.size(); ++i) {
+		AstNodePtr<StructNode> curStruct = mod->members.at(structs.at(i)).castTo<StructNode>();
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("struct "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curStruct->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
+	for (size_t i = 0; i < classes.size(); ++i) {
+		AstNodePtr<ClassNode> curClass = mod->members.at(classes.at(i)).castTo<ClassNode>();
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("class "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curClass->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
 	for (size_t i = 0; i < structs.size(); ++i) {
 		AstNodePtr<StructNode> curStruct = mod->members.at(structs.at(i)).castTo<StructNode>();
 
@@ -236,18 +393,47 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 			assert(curVar->astNodeType == AstNodeType::Var);
 
+			if (j)
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
 			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
 
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeName(headerFileOut, curVar->type));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageTypeName(headerFileOut, curVar->type));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curVar->name));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get"));
+				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
+			}
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set"));
+				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data);\n"));
+			}
 		}
 
 		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
 
 		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("};\n"));
 	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
 
 	for (size_t i = 0; i < classes.size(); ++i) {
 		AstNodePtr<ClassNode> curClass = mod->members.at(classes.at(i)).castTo<ClassNode>();
@@ -263,17 +449,138 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 			assert(curVar->astNodeType == AstNodeType::Var);
 
+			if (j)
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
 			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
 
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeName(headerFileOut, curVar->type));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageTypeName(headerFileOut, curVar->type));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curVar->name));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get"));
+				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
+			}
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set"));
+				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data);\n"));
+			}
 		}
 
 		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
 
 		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("};\n"));
+	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
+	for (size_t i = 0; i < structs.size(); ++i) {
+		AstNodePtr<StructNode> curStruct = mod->members.at(structs.at(i)).castTo<StructNode>();
+
+		for (size_t j = 0; j < curStruct->members.size(); ++j) {
+			AstNodePtr<VarNode> curVar = curStruct->members.at(j).castTo<VarNode>();
+
+			assert(curVar->astNodeType == AstNodeType::Var);
+
+			if (j)
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curStruct->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get"));
+				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
+
+				// TODO: Implement it.
+			}
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curStruct->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set"));
+				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data);\n"));
+
+				// TODO: Implement it.
+			}
+		}
+	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
+	for (size_t i = 0; i < classes.size(); ++i) {
+		AstNodePtr<ClassNode> curClass = mod->members.at(classes.at(i)).castTo<ClassNode>();
+
+		for (size_t j = 0; j < curClass->members.size(); ++j) {
+			AstNodePtr<VarNode> curVar = curClass->members.at(j).castTo<VarNode>();
+
+			assert(curVar->astNodeType == AstNodeType::Var);
+
+			if (j)
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curClass->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get"));
+				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
+
+				// TODO: Implement it.
+			}
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curClass->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set"));
+				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data);\n"));
+
+				// TODO: Implement it.
+			}
+		}
 	}
 
 	for (size_t i = 0; i < namespaceScopes; ++i) {
