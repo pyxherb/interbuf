@@ -12,6 +12,7 @@ INTERBUFC_API CXXCompiler::~CXXCompiler() {
 
 static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent);
 static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &file, IdRef *idRef);
+static std::optional<interbufc::CompilationError> _writeInternalStorageName(interbufc::File &file, const std::string_view &name);
 static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
 
 static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent) {
@@ -28,6 +29,12 @@ static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &f
 	}
 	return {};
 };
+
+static std::optional<interbufc::CompilationError> _writeInternalStorageName(interbufc::File& file, const std::string_view& name) {
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("_"));
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
+	return {};
+}
 
 static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
 	switch (typeName->typeNameKind) {
@@ -400,7 +407,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageTypeName(headerFileOut, curVar->type));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
-			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curVar->name));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageName(headerFileOut, curVar->name));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
 
 			{
@@ -444,6 +451,9 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curClass->name));
 		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" {\n"));
 
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("public:\n"));
+
 		for (size_t j = 0; j < curClass->members.size(); ++j) {
 			AstNodePtr<VarNode> curVar = curClass->members.at(j).castTo<VarNode>();
 
@@ -456,7 +466,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageTypeName(headerFileOut, curVar->type));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
-			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curVar->name));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageName(headerFileOut, curVar->name));
 			INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
 
 			{
