@@ -38,7 +38,9 @@ static std::optional<interbufc::CompilationError> _writeInternalStorageName(inte
 }
 
 static std::optional<interbufc::CompilationError> _writeMethodVarName(interbufc::File &file, const std::string_view &name) {
-	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
+	char s[2] = { name[0], '\0' };
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s, sizeof(s) - 1));
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name.substr(1)));
 	return {};
 }
 
@@ -251,6 +253,75 @@ static std::optional<interbufc::CompilationError> _writeDirectTypeName(interbufc
 	return {};
 }
 
+static std::optional<interbufc::CompilationError> _writeInterbufTypeNameInstanceTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
+redump:
+	switch (typeName->typeNameKind) {
+		case TypeNameKind::I8:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::I8>"));
+			break;
+		case TypeNameKind::I16:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::I16>"));
+			break;
+		case TypeNameKind::I32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::I32>"));
+			break;
+		case TypeNameKind::I64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::I64>"));
+			break;
+		case TypeNameKind::U8:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::U8>"));
+			break;
+		case TypeNameKind::U16:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::U16>"));
+			break;
+		case TypeNameKind::U32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::U32>"));
+			break;
+		case TypeNameKind::U64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::U64>"));
+			break;
+		case TypeNameKind::F32:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::F32>"));
+			break;
+		case TypeNameKind::F64:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::F64>"));
+			break;
+		case TypeNameKind::String:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::String>"));
+			break;
+		case TypeNameKind::Bool:
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::Bool>"));
+			break;
+		case TypeNameKind::Custom: {
+			AstNodePtr<MemberNode> m;
+
+			INTERBUFC_RETURN_IF_COMP_ERROR(resolveCustomTypeName(typeName.castTo<CustomTypeNameNode>(), m));
+
+			if (!m)
+				return CompilationError(typeName->tokenRange, CompilationErrorKind::InvalidTypeName);
+
+			switch (m->astNodeType) {
+				case AstNodeType::Class:
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::ClassDataTypeObject"));
+					break;
+				case AstNodeType::Struct:
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::StructDataTypeObject"));
+					break;
+				case AstNodeType::Enum:
+					typeName = m.castTo<EnumNode>()->baseType;
+					goto redump;
+				default:
+					std::terminate();
+			}
+			break;
+		}
+		default:
+			std::terminate();
+	}
+
+	return {};
+}
+
 INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 	AstNodePtr<ModuleNode> mod) {
 	File headerFileOut, sourceFileOut;
@@ -433,7 +504,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get"));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
 			}
@@ -441,7 +512,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 			{
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
 
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set"));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
@@ -488,7 +559,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get"));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
 			}
@@ -496,7 +567,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 			{
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
 
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set"));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
@@ -529,7 +600,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curStruct->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get"));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("() {\n"));
 
@@ -547,7 +618,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curStruct->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set"));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
@@ -584,7 +655,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curClass->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get"));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("() {\n"));
 
@@ -602,7 +673,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curClass->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set"));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
@@ -674,7 +745,217 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
 
-	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::InternalExceptionPointer createInterbufResources(peff::Alloc *allocator, InterbufResources &resourcesOut) {\n"));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::InternalExceptionPointer "));
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(sourceFileOut, mod->namespacePath.get()));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("::createInterbufResources(peff::Alloc *allocator, InterbufResources &resourcesOut) {\n"));
+
+	const std::string_view documentTmpVarName = "document",
+						   typeObjectTmpVarName = "typeObject",
+						   structLayoutTmpVarName = "structLayout",
+						   classLayoutTmpVarName = "classLayout";
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::ObjectPtr<interbuf::Document> "));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(documentTmpVarName));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+	{
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(documentTmpVarName));
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = interbuf::makeObject<interbuf::Document>(allocator, allocator)))\n"));
+
+		{
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
+		}
+	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::ObjectPtr<interbuf::DataTypeObject> "));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::ObjectPtr<interbuf::StructLayout> "));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(structLayoutTmpVarName));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+
+	for (size_t i = 0; i < structs.size(); ++i) {
+		AstNodePtr<StructNode> curStruct = mod->members.at(structs.at(i)).castTo<StructNode>();
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+		{
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(structLayoutTmpVarName));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = interbuf::makeObject<interbuf::StructLayout>(allocator, "));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(documentTmpVarName));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", allocator)))\n"));
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
+			}
+		}
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, curStruct->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(structLayoutTmpVarName));
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
+	}
+
+	for (size_t i = 0; i < classes.size(); ++i) {
+		AstNodePtr<ClassNode> curClass = mod->members.at(structs.at(i)).castTo<ClassNode>();
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+		{
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(structLayoutTmpVarName));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = interbuf::makeObject<interbuf::ClassLayout>(allocator, "));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(documentTmpVarName));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", allocator)))\n"));
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
+			}
+		}
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, curClass->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(structLayoutTmpVarName));
+		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
+	}
+
+	for (size_t i = 0; i < structs.size(); ++i) {
+		AstNodePtr<StructNode> curStruct = mod->members.at(structs.at(i)).castTo<StructNode>();
+
+		for (size_t j = 0; j < curStruct->members.size(); ++j) {
+			AstNodePtr<VarNode> curVar = curStruct->members.at(j).castTo<VarNode>();
+
+			assert(curVar->astNodeType == AstNodeType::Var);
+
+			if (j)
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::makeObject<"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeInterbufTypeNameInstanceTypeName(sourceFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(">("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(documentTmpVarName));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", allocator)"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("))\n"));
+
+				{
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
+					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
+				}
+			}
+
+			switch (curVar->type->typeNameKind) {
+				case TypeNameKind::Custom: {
+					AstNodePtr<MemberNode> m;
+
+					INTERBUFC_RETURN_IF_COMP_ERROR(resolveCustomTypeName(curVar->type.castTo<CustomTypeNameNode>(), m));
+
+					if (!m)
+						return CompilationError(curVar->type->tokenRange, CompilationErrorKind::InvalidTypeName);
+
+					switch (m->astNodeType) {
+						case AstNodeType::Class:
+							INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<ClassDataTypeObject>()->classLayout = "));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
+							INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, m->name));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+							break;
+						case AstNodeType::Struct:
+							INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<ClassDataTypeObject>()->structLayout = "));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
+							INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, m->name));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+							break;
+						case AstNodeType::Enum:
+							break;
+						default:
+							std::terminate();
+					}
+				}
+				default:;
+			}
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(structLayoutTmpVarName));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("->addField("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::StructField {"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", interbuf_offsetof("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curStruct->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(")"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("})"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("))\n"));
+
+				{
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
+					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
+				}
+			}
+		}
+	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::ObjectPtr<interbuf::ClassLayout> "));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(classLayoutTmpVarName));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+
+	for (size_t i = 0; i < classes.size(); ++i) {
+		AstNodePtr<ClassNode> curClass = mod->members.at(classes.at(i)).castTo<ClassNode>();
+
+		for (size_t j = 0; j < curClass->members.size(); ++j) {
+			AstNodePtr<VarNode> curVar = curClass->members.at(j).castTo<VarNode>();
+
+			assert(curVar->astNodeType == AstNodeType::Var);
+
+			if (j)
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+		}
+	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
 
 	// TODO: Implement it.
 
