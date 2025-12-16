@@ -3,7 +3,7 @@
 
 using namespace interbufc;
 
-INTERBUFC_API AstNode::AstNode(AstNodeType astNodeType, peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : astNodeType(astNodeType), selfAllocator(selfAllocator), document(document) {
+INTERBUFC_API AstNode::AstNode(AstNodeType astNodeType, peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : astNodeType(astNodeType), selfAllocator(selfAllocator), document(document.get()) {
 	assert(document);
 	document->clearDeferredDestructibleAstNodes();
 }

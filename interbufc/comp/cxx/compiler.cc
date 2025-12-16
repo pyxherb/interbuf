@@ -31,7 +31,12 @@ static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &f
 };
 
 static std::optional<interbufc::CompilationError> _writeInternalStorageName(interbufc::File& file, const std::string_view& name) {
-	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("_"));
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("_generated_"));
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
+	return {};
+}
+
+static std::optional<interbufc::CompilationError> _writeMethodVarName(interbufc::File &file, const std::string_view &name) {
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
 	return {};
 }
@@ -415,20 +420,16 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get"));
-				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
 			}
 
 			{
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
 
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set"));
-				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data);\n"));
@@ -474,20 +475,16 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get"));
-				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" get_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
 			}
 
 			{
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
 
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set"));
-				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void set_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data);\n"));
@@ -519,13 +516,17 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curStruct->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get"));
-				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("() {\n"));
 
-				// TODO: Implement it.
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("return "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageName(headerFileOut, curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("}\n"));
 			}
 
 			{
@@ -533,15 +534,19 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curStruct->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set"));
-				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data);\n"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data) {\n"));
 
-				// TODO: Implement it.
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("this->"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageName(headerFileOut, curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" = data;\n"));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("}\n"));
 			}
 		}
 	}
@@ -566,13 +571,17 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curClass->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get"));
-				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("();\n"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::get_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("() {\n"));
 
-				// TODO: Implement it.
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("return "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageName(headerFileOut, curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("}\n"));
 			}
 
 			{
@@ -580,15 +589,19 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("INTERBUF_FORCEINLINE void "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curClass->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set"));
-				char s[2] = { (char)toupper(curVar->name.at(0)), '\0' };
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(s));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(((std::string_view)curVar->name).substr(1)));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("::set_"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeMethodVarName(headerFileOut, curVar->name));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("("));
 				INTERBUFC_RETURN_IF_COMP_ERROR(_writeStorageTypeName(headerFileOut, curVar->type));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data);\n"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" data) {\n"));
 
-				// TODO: Implement it.
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("this->"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageName(headerFileOut, curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" = data;\n"));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("}\n"));
 			}
 		}
 	}
