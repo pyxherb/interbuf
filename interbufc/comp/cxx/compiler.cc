@@ -16,6 +16,7 @@ static std::optional<interbufc::CompilationError> _writeInternalStorageName(inte
 static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
 
 static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent) {
+	assert(indent < UINT32_MAX);
 	for (size_t i = 0; i < indent; ++i)
 		INTERBUFC_RETURN_IF_COMP_ERROR(file.write("\t"));
 	return {};
@@ -30,7 +31,7 @@ static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &f
 	return {};
 };
 
-static std::optional<interbufc::CompilationError> _writeInternalStorageName(interbufc::File& file, const std::string_view& name) {
+static std::optional<interbufc::CompilationError> _writeInternalStorageName(interbufc::File &file, const std::string_view &name) {
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("_generated_"));
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
 	return {};
@@ -38,6 +39,18 @@ static std::optional<interbufc::CompilationError> _writeInternalStorageName(inte
 
 static std::optional<interbufc::CompilationError> _writeMethodVarName(interbufc::File &file, const std::string_view &name) {
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
+	return {};
+}
+
+static std::optional<interbufc::CompilationError> _writeTypeLayoutName(interbufc::File &file, const std::string_view &name) {
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("generated_"));
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("_layout"));
+	return {};
+}
+
+static std::optional<interbufc::CompilationError> _writeDocumentVarName(interbufc::File &file) {
+	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("generated_document"));
 	return {};
 }
 
@@ -606,10 +619,66 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 		}
 	}
 
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("struct InterbufResources {\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("interbuf::ObjectPtr<interbuf::Document> "));
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeDocumentVarName(headerFileOut));
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+
+	for (size_t i = 0; i < structs.size(); ++i) {
+		AstNodePtr<StructNode> curStruct = mod->members.at(structs.at(i)).castTo<StructNode>();
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("interbuf::ObjectPtr<interbuf::StructLayoutObject> "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(headerFileOut, curStruct->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+	}
+
+	for (size_t i = 0; i < classes.size(); ++i) {
+		AstNodePtr<ClassNode> curClass = mod->members.at(structs.at(i)).castTo<ClassNode>();
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("interbuf::ObjectPtr<interbuf::ClassLayoutObject> "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(headerFileOut, curClass->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(";\n"));
+	}
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("};\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+	INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("interbuf::InternalExceptionPointer createInterbufResources(peff::Alloc *allocator, InterbufResources &resourcesOut);\n"));
+
 	for (size_t i = 0; i < namespaceScopes; ++i) {
 		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, namespaceScopes - i - 1));
 		INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("}\n"));
 	}
+
+	headerFileOut.close();
+
+	//
+	// Write the source file.
+	//
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("#include \""));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(g_outputFileName));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".h\"\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::InternalExceptionPointer createInterbufResources(peff::Alloc *allocator, InterbufResources &resourcesOut) {\n"));
+
+	// TODO: Implement it.
+
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("}\n"));
 
 	return {};
 }

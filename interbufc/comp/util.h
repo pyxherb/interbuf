@@ -21,18 +21,24 @@ namespace interbufc {
 		}
 
 		INTERBUFC_FORCEINLINE std::optional<CompilationError> read(char *buffer, size_t size) const {
+			if (!size)
+				return {};
 			if (fread(buffer, size, 1, _fp) < 1)
 				return genIOCompError();
 			return {};
 		}
 
 		INTERBUFC_FORCEINLINE std::optional<CompilationError> write(const char *buffer, size_t size) const {
+			if (!size)
+				return {};
 			if (fwrite(buffer, size, 1, _fp) < 1)
 				return genIOCompError();
 			return {};
 		}
 
 		INTERBUFC_FORCEINLINE std::optional<CompilationError> write(const std::string_view &s) const {
+			if (!s.size())
+				return {};
 			if (fwrite(s.data(), s.size(), 1, _fp) < 1)
 				return genIOCompError();
 			return {};
