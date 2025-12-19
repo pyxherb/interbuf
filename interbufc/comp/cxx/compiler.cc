@@ -940,6 +940,9 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(classLayoutTmpVarName));
 	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
 
+	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("peff::String name(allocator);"));
+
 	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
 
 	for (size_t i = 0; i < classes.size(); ++i) {
@@ -952,6 +955,99 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 			if (j)
 				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("name = peff::String(allocator);\n"));
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!(name.build(\""));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\")))\n"));
+
+				{
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
+					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
+				}
+			}
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::makeObject<"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeInterbufTypeNameInstanceTypeName(sourceFileOut, curVar->type));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(">("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(documentTmpVarName));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", allocator)"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("))\n"));
+
+				{
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
+					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
+				}
+			}
+
+			switch (curVar->type->typeNameKind) {
+				case TypeNameKind::Custom: {
+					AstNodePtr<MemberNode> m;
+
+					INTERBUFC_RETURN_IF_COMP_ERROR(resolveCustomTypeName(curVar->type.castTo<CustomTypeNameNode>(), m));
+
+					if (!m)
+						return CompilationError(curVar->type->tokenRange, CompilationErrorKind::InvalidTypeName);
+
+					switch (m->astNodeType) {
+						case AstNodeType::Class:
+							INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<ClassDataTypeObject>()->classLayout = "));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
+							INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, m->name));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+							break;
+						case AstNodeType::Struct:
+							INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<ClassDataTypeObject>()->structLayout = "));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
+							INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, m->name));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+							break;
+						case AstNodeType::Enum:
+							break;
+						default:
+							std::terminate();
+					}
+				}
+				default:;
+			}
+
+			{
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(structLayoutTmpVarName));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("->addField("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::ClassField {"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("std::move(name), "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", interbuf_offsetof("));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curClass->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curVar->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(")"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("})"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("))\n"));
+
+				{
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
+					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
+				}
+			}
 		}
 	}
 
