@@ -253,44 +253,44 @@ static std::optional<interbufc::CompilationError> _writeDirectTypeName(interbufc
 	return {};
 }
 
-static std::optional<interbufc::CompilationError> _writeInterbufTypeNameInstanceTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
+static std::optional<interbufc::CompilationError> _writeInterbufTypeNameInstanceInitValue(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
 redump:
 	switch (typeName->typeNameKind) {
 		case TypeNameKind::I8:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::I8>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::I8}"));
 			break;
 		case TypeNameKind::I16:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::I16>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::I16}"));
 			break;
 		case TypeNameKind::I32:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::I32>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::I32}"));
 			break;
 		case TypeNameKind::I64:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::I64>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::I64}"));
 			break;
 		case TypeNameKind::U8:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::U8>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::U8}"));
 			break;
 		case TypeNameKind::U16:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::U16>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::U16}"));
 			break;
 		case TypeNameKind::U32:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::U32>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::U32}"));
 			break;
 		case TypeNameKind::U64:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::U64>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::U64}"));
 			break;
 		case TypeNameKind::F32:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::F32>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::F32}"));
 			break;
 		case TypeNameKind::F64:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::F64>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::F64}"));
 			break;
 		case TypeNameKind::String:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::String>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::String}"));
 			break;
 		case TypeNameKind::Bool:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::SimpleDataTypeObject<interbuf::FieldTypeKind::Bool>"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::Bool}"));
 			break;
 		case TypeNameKind::Custom: {
 			AstNodePtr<MemberNode> m;
@@ -302,10 +302,10 @@ redump:
 
 			switch (m->astNodeType) {
 				case AstNodeType::Class:
-					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::ClassDataTypeObject"));
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::Class}"));
 					break;
 				case AstNodeType::Struct:
-					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::StructDataTypeObject"));
+					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::Struct}"));
 					break;
 				case AstNodeType::Enum:
 					typeName = m.castTo<EnumNode>()->baseType;
@@ -777,7 +777,7 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 	INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
 
-	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::ObjectPtr<interbuf::DataTypeObject> "));
+	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::DataType "));
 	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
 	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
 
@@ -857,23 +857,10 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
 
 			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
-
-			{
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = "));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::makeObject<"));
-				INTERBUFC_RETURN_IF_COMP_ERROR(_writeInterbufTypeNameInstanceTypeName(sourceFileOut, curVar->type));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(">("));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(documentTmpVarName));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", allocator)"));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("))\n"));
-
-				{
-					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
-					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
-				}
-			}
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = "));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInterbufTypeNameInstanceInitValue(sourceFileOut, curVar->type));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
 
 			switch (curVar->type->typeNameKind) {
 				case TypeNameKind::Custom: {
@@ -888,18 +875,18 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 						case AstNodeType::Class:
 							INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
 							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
-							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<ClassDataTypeObject>()->classLayout = "));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".typeDefObject = "));
 							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
 							INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, m->name));
-							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<Object>()\n"));
 							break;
 						case AstNodeType::Struct:
 							INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
 							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
-							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<ClassDataTypeObject>()->structLayout = "));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".typeDefObject = "));
 							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
 							INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, m->name));
-							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<Object>()\n"));
 							break;
 						case AstNodeType::Enum:
 							break;
@@ -972,24 +959,11 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 				}
 			}
 
-			{
-				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
-
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("if (!("));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = "));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interbuf::makeObject<"));
-				INTERBUFC_RETURN_IF_COMP_ERROR(_writeInterbufTypeNameInstanceTypeName(sourceFileOut, curVar->type));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(">("));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(documentTmpVarName));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(", allocator)"));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("))\n"));
-
-				{
-					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +2));
-					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("return interbuf::OutOfMemoryError::alloc();\n"));
-				}
-			}
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = "));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInterbufTypeNameInstanceInitValue(sourceFileOut, curVar->type));
+			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
 
 			switch (curVar->type->typeNameKind) {
 				case TypeNameKind::Custom: {
@@ -1004,18 +978,18 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 						case AstNodeType::Class:
 							INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
 							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
-							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<ClassDataTypeObject>()->classLayout = "));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".typeDefObject = "));
 							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
 							INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, m->name));
-							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<Object>()\n"));
 							break;
 						case AstNodeType::Struct:
 							INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
 							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(typeObjectTmpVarName));
-							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<ClassDataTypeObject>()->structLayout = "));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".typeDefObject = "));
 							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("resourcesOut."));
 							INTERBUFC_RETURN_IF_COMP_ERROR(_writeTypeLayoutName(sourceFileOut, m->name));
-							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+							INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(".castTo<Object>()\n"));
 							break;
 						case AstNodeType::Enum:
 							break;
