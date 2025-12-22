@@ -322,6 +322,102 @@ redump:
 	return {};
 }
 
+static std::optional<interbufc::CompilationError> _writeExpr(interbufc::File &file, AstNodePtr<ExprNode> expr) {
+redump:
+	switch (expr->exprKind) {
+		case ExprKind::I8: {
+			AstNodePtr<I8LiteralExprNode> e = expr.castTo<I8LiteralExprNode>();
+
+			char s[8];
+			sprintf(s, "%hd", (int16_t)e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::I16: {
+			AstNodePtr<I16LiteralExprNode> e = expr.castTo<I16LiteralExprNode>();
+
+			char s[16];
+			sprintf(s, "%hd", e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::I32: {
+			AstNodePtr<I32LiteralExprNode> e = expr.castTo<I32LiteralExprNode>();
+
+			char s[32];
+			sprintf(s, "%d", e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::I64: {
+			AstNodePtr<I64LiteralExprNode> e = expr.castTo<I64LiteralExprNode>();
+
+			char s[48];
+			sprintf(s, "%lld", e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::U8: {
+			AstNodePtr<U8LiteralExprNode> e = expr.castTo<U8LiteralExprNode>();
+
+			char s[4];
+			sprintf(s, "%u", (uint16_t)e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::U16: {
+			AstNodePtr<U16LiteralExprNode> e = expr.castTo<U16LiteralExprNode>();
+
+			char s[8];
+			sprintf(s, "%hu", e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::U32: {
+			AstNodePtr<U32LiteralExprNode> e = expr.castTo<U32LiteralExprNode>();
+
+			char s[16];
+			sprintf(s, "%u", e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::U64: {
+			AstNodePtr<U64LiteralExprNode> e = expr.castTo<U64LiteralExprNode>();
+
+			char s[32];
+			sprintf(s, "%llu", e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::F32: {
+			AstNodePtr<F32LiteralExprNode> e = expr.castTo<F32LiteralExprNode>();
+
+			char s[16];
+			sprintf(s, "%f", e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::F64: {
+			AstNodePtr<F64LiteralExprNode> e = expr.castTo<F64LiteralExprNode>();
+
+			char s[32];
+			sprintf(s, "%f", e->data);
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s));
+			break;
+		}
+		case ExprKind::Bool: {
+			AstNodePtr<BoolLiteralExprNode> e = expr.castTo<BoolLiteralExprNode>();
+
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(e->data ? "true" : "false"));
+			break;
+		}
+		default:
+			std::terminate();
+	}
+
+	return {};
+}
+
 INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 	AstNodePtr<ModuleNode> mod) {
 	File headerFileOut, sourceFileOut;
@@ -413,6 +509,8 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 	for (size_t i = 0; i < enums.size(); ++i) {
 		AstNodePtr<EnumNode> curEnum = mod->members.at(enums.at(i)).castTo<EnumNode>();
 
+		INTERBUFC_RETURN_IF_COMP_ERROR(fillEnum(*this, curEnum));
+
 		switch (curEnum->baseType->typeNameKind) {
 			case TypeNameKind::I8:
 			case TypeNameKind::I16:
@@ -429,19 +527,32 @@ INTERBUFC_API std::optional<CompilationError> CXXCompiler::compile(
 
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("enum "));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curEnum->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" : "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeDirectTypeName(headerFileOut, curEnum->baseType));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" {\n"));
 
-				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
+				for (size_t j = 0; j < curEnum->members.size(); ++j) {
+					auto m = curEnum->members.at(j);
+					assert(m->astNodeType == AstNodeType::EnumItem);
 
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent + 1));
+
+					INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(m->name));
+					INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" = "));
+					INTERBUFC_RETURN_IF_COMP_ERROR(_writeExpr(headerFileOut, m.castTo<EnumItemNode>()->value));
+
+					if (j + 1 < curEnum->members.size())
+						INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(","));
+
+					INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("\n"));
+				}
+
+				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(headerFileOut, indent));
 				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("};\n"));
 				break;
 			}
-			case TypeNameKind::String: {
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write("using "));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(curEnum->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(headerFileOut.write(" = peff::String\n"));
-				break;
-			}
+			case TypeNameKind::String:
+				return CompilationError(curEnum->baseType->tokenRange, CompilationErrorKind::InvalidEnumBaseType);
 			case TypeNameKind::Custom:
 				return CompilationError(curEnum->baseType->tokenRange, CompilationErrorKind::InvalidEnumBaseType);
 			default:

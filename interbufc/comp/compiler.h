@@ -34,6 +34,9 @@ namespace interbufc {
 			AstNodePtr<ModuleNode> mod) = 0;
 	};
 
+	std::optional<interbufc::CompilationError> fillEnum(Compiler &compiler, AstNodePtr<EnumNode> enumNode);
+	std::optional<interbufc::CompilationError> defaultEnumValue(Compiler &compiler, peff::Alloc *allocator, AstNodePtr<TypeNameNode> expr, AstNodePtr<ExprNode> &exprOut);
+	std::optional<interbufc::CompilationError> incEnumValue(Compiler &compiler, peff::Alloc *allocator, AstNodePtr<ExprNode> expr, AstNodePtr<ExprNode> &exprOut);
 	std::optional<CompilationError> resolveCustomTypeName(AstNodePtr<CustomTypeNameNode> typeName, AstNodePtr<MemberNode> &memberOut);
 }
 

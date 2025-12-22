@@ -478,9 +478,6 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseProgramStmt() {
 							}
 						}
 
-						if (!enumNode->addMember(memberField.castTo<MemberNode>()))
-							return genOutOfMemoryError();
-
 						Token *commaToken;
 
 						if ((commaToken = peekToken())->tokenId != TokenId::Comma) {

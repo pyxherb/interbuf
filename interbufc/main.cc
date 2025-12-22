@@ -325,40 +325,6 @@ void dumpCompilationError(peff::SharedPtr<interbufc::Parser> parser, const inter
 			break;
 	}
 }
-/*
-class FileWriter : public interbufc::Writer {
-public:
-	FILE *fp = NULL;
-
-	FileWriter(FILE *fp) : fp(fp) {
-	}
-
-	SLKC_API virtual ~FileWriter() {
-		if (fp)
-			fclose(fp);
-	}
-
-	virtual std::optional<interbufc::CompilationError> write(const char *src, size_t size) override {
-		if (fwrite(src, size, 1, fp) < 1) {
-			return interbufc::CompilationError(interbufc::TokenRange{ 0 }, interbufc::CompilationErrorKind::ErrorWritingCompiledModule);
-		}
-		return {};
-	}
-};
-
-class ANSIDumpWriter : public interbufc::DumpWriter {
-public:
-	ANSIDumpWriter() {
-	}
-
-	SLKC_API virtual ~ANSIDumpWriter() {
-	}
-
-	virtual bool write(const char *src, size_t size) override {
-		fwrite(src, size, 1, stdout);
-		return true;
-	}
-};*/
 
 int main(int argc, char *argv[]) {
 #ifdef _MSC_VER

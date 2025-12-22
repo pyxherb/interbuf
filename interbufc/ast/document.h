@@ -14,7 +14,8 @@ namespace interbufc {
 		ErrorOpeningFile,
 		IO,
 		InvalidTypeName,
-		InvalidEnumBaseType
+		InvalidEnumBaseType,
+		EnumTypeNotIncrementable
 	};
 
 	class TypeNameNode;
@@ -60,8 +61,10 @@ namespace interbufc {
 		}
 	};
 
-#define INTERBUFC_RETURN_IF_COMP_ERROR(...) \
-	if (std::optional<interbufc::CompilationError> _ = (__VA_ARGS__); _) return _
+#define INTERBUFC_RETURN_IF_COMP_ERROR(...)                                \
+	if (std::optional<interbufc::CompilationError> _ = (__VA_ARGS__); _) { \
+		return _;                                                          \
+	} else
 
 	enum class CompilationWarningKind : int {
 		UnusedExprResult = 0,
