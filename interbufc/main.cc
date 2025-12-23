@@ -511,6 +511,20 @@ int main(int argc, char *argv[]) {
 					encounteredErrors = true;
 					dumpCompilationError(parser, i, 0);
 				}
+			} else if (interbufc::g_language == "ts") {
+				interbufc::TypeScriptCompiler compiler(peff::getDefaultAlloc());
+
+				std::optional<interbufc::CompilationError> e = compiler.compile(mod);
+
+				if (e) {
+					encounteredErrors = true;
+					dumpCompilationError(parser, *e, 0);
+				}
+
+				for (auto &i : compiler.errors) {
+					encounteredErrors = true;
+					dumpCompilationError(parser, i, 0);
+				}
 			} else {
 				printError("Unrecognized language");
 				return EINVAL;

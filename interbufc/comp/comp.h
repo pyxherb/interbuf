@@ -2,5 +2,6 @@
 #define _INTERBUF_COMP_H_
 
 #include "cxx/compiler.h"
+#include "ts/compiler.h"
 
 #endif

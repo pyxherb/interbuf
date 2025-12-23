@@ -13,7 +13,15 @@ INTERBUFC_API CXXCompiler::~CXXCompiler() {
 static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent);
 static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &file, IdRef *idRef);
 static std::optional<interbufc::CompilationError> _writeInternalStorageName(interbufc::File &file, const std::string_view &name);
+static std::optional<interbufc::CompilationError> _writeMethodVarName(interbufc::File &file, const std::string_view &name);
 static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
+static std::optional<interbufc::CompilationError> _writeTypeLayoutName(interbufc::File &file, const std::string_view &name);
+static std::optional<interbufc::CompilationError> _writeDocumentVarName(interbufc::File &file);
+static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
+static std::optional<interbufc::CompilationError> _writeStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
+static std::optional<interbufc::CompilationError> _writeDirectTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
+static std::optional<interbufc::CompilationError> _writeInterbufTypeNameInstanceInitValue(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
+static std::optional<interbufc::CompilationError> _writeExpr(interbufc::File &file, AstNodePtr<ExprNode> expr);
 
 static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent) {
 	assert(indent < UINT32_MAX);
