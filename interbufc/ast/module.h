@@ -51,7 +51,7 @@ namespace interbufc {
 		/// @brief Remove a named member.
 		/// @param name Name of the member to be removed.
 		/// @return Whether the member is removed successfully.
-		[[nodiscard]] INTERBUFC_API bool removeMember(const std::string_view &name) noexcept;
+		[[nodiscard]] INTERBUFC_API void removeMember(const std::string_view &name) noexcept;
 
 		INTERBUFC_API void setParser(AstNodePtr<Parser> parser);
 	};

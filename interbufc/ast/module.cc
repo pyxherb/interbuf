@@ -121,18 +121,15 @@ INTERBUFC_API bool ModuleNode::indexMember(size_t indexInMemberArray) noexcept {
 	return true;
 }
 
-INTERBUFC_API bool ModuleNode::removeMember(const std::string_view &name) noexcept {
+INTERBUFC_API void ModuleNode::removeMember(const std::string_view &name) noexcept {
 	size_t index = memberIndices.at(name);
-	if (!members.eraseRange(index, index + 1))
-		return false;
-	if (!memberIndices.remove(name))
-		return false;
+	members.eraseRange(index, index + 1);
+	memberIndices.remove(name);
 	for (auto i : memberIndices) {
 		if (i.second > index) {
 			--i.second;
 		}
 	}
-	return true;
 }
 
 INTERBUFC_API void ModuleNode::setParser(AstNodePtr<Parser> parser) {
