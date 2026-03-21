@@ -1,4 +1,5 @@
 #include <interbufc/ast/lexer.h>
+#include <algorithm>
 
 using namespace interbufc;
 
@@ -175,13 +176,13 @@ INTERBUFC_API std::optional<LexicalError> Lexer::lex(const std::string_view &src
 
 					size_t prevYYCURSORIndex = prevYYCURSOR - src.data();
 					auto prevYYCURSORPos = src.find_last_of('\n', prevYYCURSORIndex);
-					if(prevYYCURSORPos == std::string::npos)
+					if(prevYYCURSORPos == std::string_view::npos)
 						prevYYCURSORPos = 0;
 					prevYYCURSORPos = prevYYCURSORIndex - prevYYCURSORPos;
 
 					size_t YYCURSORIndex = YYCURSOR - src.data();
 					auto YYCURSORPos = src.find_last_of('\n', YYCURSORIndex);
-					if(YYCURSORPos == std::string::npos)
+					if(YYCURSORPos == std::string_view::npos)
 						YYCURSORPos = 0;
 					YYCURSORPos = YYCURSORIndex - YYCURSORPos;
 
@@ -206,13 +207,13 @@ INTERBUFC_API std::optional<LexicalError> Lexer::lex(const std::string_view &src
 
 					size_t prevYYCURSORIndex = prevYYCURSOR - src.data();
 					auto prevYYCURSORPos = src.find_last_of('\n', prevYYCURSORIndex);
-					if(prevYYCURSORPos == std::string::npos)
+					if(prevYYCURSORPos == std::string_view::npos)
 						prevYYCURSORPos = 0;
 					prevYYCURSORPos = prevYYCURSORIndex - prevYYCURSORPos;
 
 					size_t YYCURSORIndex = YYCURSOR - src.data();
 					auto YYCURSORPos = src.find_last_of('\n', YYCURSORIndex);
-					if(YYCURSORPos == std::string::npos)
+					if(YYCURSORPos == std::string_view::npos)
 						YYCURSORPos = 0;
 					YYCURSORPos = YYCURSORIndex - YYCURSORPos;
 
@@ -228,13 +229,13 @@ INTERBUFC_API std::optional<LexicalError> Lexer::lex(const std::string_view &src
 
 					size_t prevYYCURSORIndex = prevYYCURSOR - src.data();
 					auto prevYYCURSORPos = src.find_last_of('\n', prevYYCURSORIndex);
-					if(prevYYCURSORPos == std::string::npos)
+					if(prevYYCURSORPos == std::string_view::npos)
 						prevYYCURSORPos = 0;
 					prevYYCURSORPos = prevYYCURSORIndex - prevYYCURSORPos;
 
 					size_t YYCURSORIndex = YYCURSOR - src.data();
 					auto YYCURSORPos = src.find_last_of('\n', YYCURSORIndex);
-					if(YYCURSORPos == std::string::npos)
+					if(YYCURSORPos == std::string_view::npos)
 						YYCURSORPos = 0;
 					YYCURSORPos = YYCURSORIndex - YYCURSORPos;
 
@@ -299,13 +300,13 @@ INTERBUFC_API std::optional<LexicalError> Lexer::lex(const std::string_view &src
 
 					size_t prevYYCURSORIndex = prevYYCURSOR - src.data();
 					auto prevYYCURSORPos = src.find_last_of('\n', prevYYCURSORIndex);
-					if(prevYYCURSORPos == std::string::npos)
+					if(prevYYCURSORPos == std::string_view::npos)
 						prevYYCURSORPos = 0;
 					prevYYCURSORPos = prevYYCURSORIndex - prevYYCURSORPos;
 
 					size_t YYCURSORIndex = YYCURSOR - src.data();
 					auto YYCURSORPos = src.find_last_of('\n', YYCURSORIndex);
-					if(YYCURSORPos == std::string::npos)
+					if(YYCURSORPos == std::string_view::npos)
 						YYCURSORPos = 0;
 					YYCURSORPos = YYCURSORIndex - YYCURSORPos;
 
@@ -324,13 +325,13 @@ INTERBUFC_API std::optional<LexicalError> Lexer::lex(const std::string_view &src
 
 					size_t prevYYCURSORIndex = prevYYCURSOR - src.data();
 					auto prevYYCURSORPos = src.find_last_of('\n', prevYYCURSORIndex);
-					if(prevYYCURSORPos == std::string::npos)
+					if(prevYYCURSORPos == std::string_view::npos)
 						prevYYCURSORPos = 0;
 					prevYYCURSORPos = prevYYCURSORIndex - prevYYCURSORPos;
 
 					size_t YYCURSORIndex = YYCURSOR - src.data();
 					auto YYCURSORPos = src.find_last_of('\n', YYCURSORIndex);
-					if(YYCURSORPos == std::string::npos)
+					if(YYCURSORPos == std::string_view::npos)
 						YYCURSORPos = 0;
 					YYCURSORPos = YYCURSORIndex - YYCURSORPos;
 
@@ -358,13 +359,13 @@ INTERBUFC_API std::optional<LexicalError> Lexer::lex(const std::string_view &src
 
 		token->sourceLocation.beginPosition = {
 			(size_t)std::count(strToBegin.begin(), strToBegin.end(), '\n'),
-			(idxLastBeginNewline == std::string::npos
+			(idxLastBeginNewline == std::string_view::npos
 					? beginIndex
 					: beginIndex - idxLastBeginNewline - 1)
 		};
 		token->sourceLocation.endPosition = {
 			(size_t)std::count(strToEnd.begin(), strToEnd.end(), '\n'),
-			(idxLastEndNewline == std::string::npos
+			(idxLastEndNewline == std::string_view::npos
 					? endIndex
 					: endIndex - idxLastEndNewline)
 		};

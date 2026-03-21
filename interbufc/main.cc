@@ -452,7 +452,7 @@ int main(int argc, char *argv[]) {
 			return EINVAL;
 		}
 
-		peff::Uninitialized<interbufc::TokenList> tokenList;
+		interbufc::TokenList tokenList(peff::getDefaultAlloc());
 		{
 			interbufc::Lexer lexer(peff::getDefaultAlloc());
 
@@ -463,12 +463,12 @@ int main(int argc, char *argv[]) {
 				return -1;
 			}
 
-			tokenList.moveFrom(std::move(lexer.tokenList));
+			tokenList = std::move(lexer.tokenList);
 		}
 
 		{
 			peff::SharedPtr<interbufc::Parser> parser;
-			if (!(parser = peff::makeShared<interbufc::Parser>(peff::getDefaultAlloc(), document, tokenList.release(), peff::getDefaultAlloc()))) {
+			if (!(parser = peff::makeShared<interbufc::Parser>(peff::getDefaultAlloc(), document, std::move(tokenList), peff::getDefaultAlloc()))) {
 				printError("Error allocating memory for the parser");
 				return ENOMEM;
 			}

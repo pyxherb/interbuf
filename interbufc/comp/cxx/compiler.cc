@@ -46,7 +46,7 @@ static std::optional<interbufc::CompilationError> _writeInternalStorageName(inte
 }
 
 static std::optional<interbufc::CompilationError> _writeMethodVarName(interbufc::File &file, const std::string_view &name) {
-	char s[2] = { name[0], '\0' };
+	char s[2] = { (char)toupper(name[0]), '\0' };
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s, sizeof(s) - 1));
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name.substr(1)));
 	return {};
@@ -97,7 +97,7 @@ static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("double"));
 			break;
 		case TypeNameKind::String:
-			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("peff::String"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("std::string_view"));
 			break;
 		case TypeNameKind::Bool:
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("bool"));

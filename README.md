@@ -6,10 +6,10 @@ This is the repository of the compiler of the protocol definition language (inte
 
 ## Supported Languages
 
-| Language   | Langugae ID | Remarks                 |
-| ---------- | ----------- | ----------------------- |
-| C++        | cpp         | Does not use exception. |
-| TypeScript | ts          | Requires ES2020.        |
+| Language   | Langugae ID | Remarks                             |
+| ---------- | ----------- | ----------------------------------- |
+| C++        | cpp         | The runtime does not use exception. |
+| TypeScript | ts          | Requires >= ES2020.                 |
 
 ## Usage
 
