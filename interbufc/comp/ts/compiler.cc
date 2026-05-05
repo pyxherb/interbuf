@@ -10,60 +10,60 @@ INTERBUFC_API TypeScriptCompiler::TypeScriptCompiler(peff::Alloc *allocator) : C
 INTERBUFC_API TypeScriptCompiler::~TypeScriptCompiler() {
 }
 
-static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent);
-static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &file, IdRef *idRef);
-static std::optional<interbufc::CompilationError> _writeInternalStorageName(interbufc::File &file, const std::string_view &name);
-static std::optional<interbufc::CompilationError> _writeMethodVarName(interbufc::File &file, const std::string_view &name);
-static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
-static std::optional<interbufc::CompilationError> _writeTypeLayoutName(interbufc::File &file, const std::string_view &name);
-static std::optional<interbufc::CompilationError> _writeDocumentVarName(interbufc::File &file);
-static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
-static std::optional<interbufc::CompilationError> _writeInterbufTypeNameInstanceInitValue(interbufc::File &file, AstNodePtr<TypeNameNode> typeName);
-static std::optional<interbufc::CompilationError> _writeExpr(interbufc::File &file, AstNodePtr<ExprNode> expr);
+static std::optional<interbufc::CompilationError> _write_indent(interbufc::File &file, size_t indent);
+static std::optional<interbufc::CompilationError> _write_id_ref(interbufc::File &file, IdRef *id_ref);
+static std::optional<interbufc::CompilationError> _write_internal_storage_name(interbufc::File &file, const std::string_view &name);
+static std::optional<interbufc::CompilationError> _write_method_var_name(interbufc::File &file, const std::string_view &name);
+static std::optional<interbufc::CompilationError> _write_internal_storage_type_name(interbufc::File &file, AstNodePtr<TypeNameNode> type_name);
+static std::optional<interbufc::CompilationError> _write_type_layout_name(interbufc::File &file, const std::string_view &name);
+static std::optional<interbufc::CompilationError> _write_document_var_name(interbufc::File &file);
+static std::optional<interbufc::CompilationError> _write_internal_storage_type_name(interbufc::File &file, AstNodePtr<TypeNameNode> type_name);
+static std::optional<interbufc::CompilationError> _write_interbuf_type_name_instance_init_value(interbufc::File &file, AstNodePtr<TypeNameNode> type_name);
+static std::optional<interbufc::CompilationError> _write_expr(interbufc::File &file, AstNodePtr<ExprNode> expr);
 
-static std::optional<interbufc::CompilationError> _writeIndent(interbufc::File &file, size_t indent) {
+static std::optional<interbufc::CompilationError> _write_indent(interbufc::File &file, size_t indent) {
 	assert(indent < UINT32_MAX);
 	for (size_t i = 0; i < indent; ++i)
 		INTERBUFC_RETURN_IF_COMP_ERROR(file.write("\t"));
 	return {};
 };
 
-static std::optional<interbufc::CompilationError> _writeIdRef(interbufc::File &file, IdRef *idRef) {
-	for (size_t i = 0; i < idRef->entries.size(); ++i) {
+static std::optional<interbufc::CompilationError> _write_id_ref(interbufc::File &file, IdRef *id_ref) {
+	for (size_t i = 0; i < id_ref->entries.size(); ++i) {
 		if (i)
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("::"));
-		INTERBUFC_RETURN_IF_COMP_ERROR(file.write(idRef->entries.at(i).name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(file.write(id_ref->entries.at(i).name));
 	}
 	return {};
 };
 
-static std::optional<interbufc::CompilationError> _writeInternalStorageName(interbufc::File &file, const std::string_view &name) {
+static std::optional<interbufc::CompilationError> _write_internal_storage_name(interbufc::File &file, const std::string_view &name) {
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("_generated_"));
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
 	return {};
 }
 
-static std::optional<interbufc::CompilationError> _writeMethodVarName(interbufc::File &file, const std::string_view &name) {
+static std::optional<interbufc::CompilationError> _write_method_var_name(interbufc::File &file, const std::string_view &name) {
 	char s[2] = { name[0], '\0' };
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(s, sizeof(s) - 1));
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name.substr(1)));
 	return {};
 }
 
-static std::optional<interbufc::CompilationError> _writeTypeLayoutName(interbufc::File &file, const std::string_view &name) {
+static std::optional<interbufc::CompilationError> _write_type_layout_name(interbufc::File &file, const std::string_view &name) {
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("generated_"));
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write(name));
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("_layout"));
 	return {};
 }
 
-static std::optional<interbufc::CompilationError> _writeDocumentVarName(interbufc::File &file) {
+static std::optional<interbufc::CompilationError> _write_document_var_name(interbufc::File &file) {
 	INTERBUFC_RETURN_IF_COMP_ERROR(file.write("generated_document"));
 	return {};
 }
 
-static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
-	switch (typeName->typeNameKind) {
+static std::optional<interbufc::CompilationError> _write_internal_storage_type_name(interbufc::File &file, AstNodePtr<TypeNameNode> type_name) {
+	switch (type_name->type_name_kind) {
 		case TypeNameKind::I8:
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("number"));
 			break;
@@ -101,7 +101,7 @@ static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("boolean"));
 			break;
 		case TypeNameKind::Custom:
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIdRef(file, typeName.castTo<CustomTypeNameNode>()->idRefPtr.get()));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_write_id_ref(file, type_name.cast_to<CustomTypeNameNode>()->id_ref_ptr.get()));
 			break;
 		default:
 			std::terminate();
@@ -109,9 +109,9 @@ static std::optional<interbufc::CompilationError> _writeInternalStorageTypeName(
 	return {};
 }
 
-static std::optional<interbufc::CompilationError> _writeInterbufTypeNameInstanceInitValue(interbufc::File &file, AstNodePtr<TypeNameNode> typeName) {
+static std::optional<interbufc::CompilationError> _write_interbuf_type_name_instance_init_value(interbufc::File &file, AstNodePtr<TypeNameNode> type_name) {
 redump:
-	switch (typeName->typeNameKind) {
+	switch (type_name->type_name_kind) {
 		case TypeNameKind::I8:
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::I8}"));
 			break;
@@ -151,12 +151,12 @@ redump:
 		case TypeNameKind::Custom: {
 			AstNodePtr<MemberNode> m;
 
-			INTERBUFC_RETURN_IF_COMP_ERROR(resolveCustomTypeName(typeName.castTo<CustomTypeNameNode>(), m));
+			INTERBUFC_RETURN_IF_COMP_ERROR(resolve_custom_type_name(type_name.cast_to<CustomTypeNameNode>(), m));
 
 			if (!m)
-				return CompilationError(typeName->tokenRange, CompilationErrorKind::InvalidTypeName);
+				return CompilationError(type_name->token_range, CompilationErrorKind::InvalidTypeName);
 
-			switch (m->astNodeType) {
+			switch (m->ast_node_type) {
 				case AstNodeType::Class:
 					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::Class}"));
 					break;
@@ -164,7 +164,7 @@ redump:
 					INTERBUFC_RETURN_IF_COMP_ERROR(file.write("interbuf::DataType{interbuf::FieldTypeKind::Struct}"));
 					break;
 				case AstNodeType::Enum:
-					typeName = m.castTo<EnumNode>()->baseType;
+					type_name = m.cast_to<EnumNode>()->base_type;
 					goto redump;
 				default:
 					std::terminate();
@@ -178,11 +178,11 @@ redump:
 	return {};
 }
 
-static std::optional<interbufc::CompilationError> _writeExpr(interbufc::File &file, AstNodePtr<ExprNode> expr) {
+static std::optional<interbufc::CompilationError> _write_expr(interbufc::File &file, AstNodePtr<ExprNode> expr) {
 redump:
-	switch (expr->exprKind) {
+	switch (expr->expr_kind) {
 		case ExprKind::I8: {
-			AstNodePtr<I8LiteralExprNode> e = expr.castTo<I8LiteralExprNode>();
+			AstNodePtr<I8LiteralExprNode> e = expr.cast_to<I8LiteralExprNode>();
 
 			char s[8];
 			sprintf(s, "%hd", (int16_t)e->data);
@@ -190,7 +190,7 @@ redump:
 			break;
 		}
 		case ExprKind::I16: {
-			AstNodePtr<I16LiteralExprNode> e = expr.castTo<I16LiteralExprNode>();
+			AstNodePtr<I16LiteralExprNode> e = expr.cast_to<I16LiteralExprNode>();
 
 			char s[16];
 			sprintf(s, "%hd", e->data);
@@ -198,7 +198,7 @@ redump:
 			break;
 		}
 		case ExprKind::I32: {
-			AstNodePtr<I32LiteralExprNode> e = expr.castTo<I32LiteralExprNode>();
+			AstNodePtr<I32LiteralExprNode> e = expr.cast_to<I32LiteralExprNode>();
 
 			char s[32];
 			sprintf(s, "%d", e->data);
@@ -206,7 +206,7 @@ redump:
 			break;
 		}
 		case ExprKind::I64: {
-			AstNodePtr<I64LiteralExprNode> e = expr.castTo<I64LiteralExprNode>();
+			AstNodePtr<I64LiteralExprNode> e = expr.cast_to<I64LiteralExprNode>();
 
 			char s[48];
 			sprintf(s, "%lld", e->data);
@@ -214,7 +214,7 @@ redump:
 			break;
 		}
 		case ExprKind::U8: {
-			AstNodePtr<U8LiteralExprNode> e = expr.castTo<U8LiteralExprNode>();
+			AstNodePtr<U8LiteralExprNode> e = expr.cast_to<U8LiteralExprNode>();
 
 			char s[4];
 			sprintf(s, "%u", (uint16_t)e->data);
@@ -222,7 +222,7 @@ redump:
 			break;
 		}
 		case ExprKind::U16: {
-			AstNodePtr<U16LiteralExprNode> e = expr.castTo<U16LiteralExprNode>();
+			AstNodePtr<U16LiteralExprNode> e = expr.cast_to<U16LiteralExprNode>();
 
 			char s[8];
 			sprintf(s, "%hu", e->data);
@@ -230,7 +230,7 @@ redump:
 			break;
 		}
 		case ExprKind::U32: {
-			AstNodePtr<U32LiteralExprNode> e = expr.castTo<U32LiteralExprNode>();
+			AstNodePtr<U32LiteralExprNode> e = expr.cast_to<U32LiteralExprNode>();
 
 			char s[16];
 			sprintf(s, "%u", e->data);
@@ -238,7 +238,7 @@ redump:
 			break;
 		}
 		case ExprKind::U64: {
-			AstNodePtr<U64LiteralExprNode> e = expr.castTo<U64LiteralExprNode>();
+			AstNodePtr<U64LiteralExprNode> e = expr.cast_to<U64LiteralExprNode>();
 
 			char s[32];
 			sprintf(s, "%llu", e->data);
@@ -246,7 +246,7 @@ redump:
 			break;
 		}
 		case ExprKind::F32: {
-			AstNodePtr<F32LiteralExprNode> e = expr.castTo<F32LiteralExprNode>();
+			AstNodePtr<F32LiteralExprNode> e = expr.cast_to<F32LiteralExprNode>();
 
 			char s[16];
 			sprintf(s, "%f", e->data);
@@ -254,7 +254,7 @@ redump:
 			break;
 		}
 		case ExprKind::F64: {
-			AstNodePtr<F64LiteralExprNode> e = expr.castTo<F64LiteralExprNode>();
+			AstNodePtr<F64LiteralExprNode> e = expr.cast_to<F64LiteralExprNode>();
 
 			char s[32];
 			sprintf(s, "%f", e->data);
@@ -262,7 +262,7 @@ redump:
 			break;
 		}
 		case ExprKind::Bool: {
-			AstNodePtr<BoolLiteralExprNode> e = expr.castTo<BoolLiteralExprNode>();
+			AstNodePtr<BoolLiteralExprNode> e = expr.cast_to<BoolLiteralExprNode>();
 
 			INTERBUFC_RETURN_IF_COMP_ERROR(file.write(e->data ? "true" : "false"));
 			break;
@@ -276,23 +276,23 @@ redump:
 
 INTERBUFC_API std::optional<CompilationError> TypeScriptCompiler::compile(
 	AstNodePtr<ModuleNode> mod) {
-	File sourceFileOut;
+	File source_file_out;
 	{
 		peff::String path(allocator.get());
 
-		if (!path.build(g_outputDirectoryPath.data()))
-			return genOutOfMemoryCompError();
+		if (!path.build(g_output_directory_path.data()))
+			return gen_out_of_memory_comp_error();
 
 		if (!path.append("/"))
-			return genOutOfMemoryCompError();
+			return gen_out_of_memory_comp_error();
 
-		if (!path.append(g_outputFileName))
-			return genOutOfMemoryCompError();
+		if (!path.append(g_output_file_name))
+			return gen_out_of_memory_comp_error();
 
-		const size_t prefixLen = path.size();
+		const size_t prefix_len = path.size();
 
 		if (!path.append(".ts"))
-			return genOutOfMemoryCompError();
+			return gen_out_of_memory_comp_error();
 
 		FILE *fp;
 
@@ -300,12 +300,12 @@ INTERBUFC_API std::optional<CompilationError> TypeScriptCompiler::compile(
 			ErrorOpeningFileError e(allocator.get());
 
 			if (!e.name.build(path))
-				return genOutOfMemoryCompError();
+				return gen_out_of_memory_comp_error();
 
 			return CompilationError({ 0, 0 }, std::move(e));
 		}
 
-		sourceFileOut.setCFile(fp);
+		source_file_out.set_c_file(fp);
 	}
 
 	peff::DynArray<size_t> structs(allocator.get());
@@ -314,35 +314,35 @@ INTERBUFC_API std::optional<CompilationError> TypeScriptCompiler::compile(
 
 	for (size_t i = 0; i < mod->members.size(); ++i) {
 		auto m = mod->members.at(i);
-		switch (m->astNodeType) {
+		switch (m->ast_node_type) {
 			case AstNodeType::Struct:
-				if (!structs.pushBack(+i))
-					return genOutOfMemoryCompError();
+				if (!structs.push_back(+i))
+					return gen_out_of_memory_comp_error();
 				break;
 			case AstNodeType::Class:
-				if (!classes.pushBack(+i))
-					return genOutOfMemoryCompError();
+				if (!classes.push_back(+i))
+					return gen_out_of_memory_comp_error();
 				break;
 			case AstNodeType::Enum:
-				if (!enums.pushBack(+i))
-					return genOutOfMemoryCompError();
+				if (!enums.push_back(+i))
+					return gen_out_of_memory_comp_error();
 				break;
 			default:
 				std::terminate();
 		}
 	}
 
-	size_t namespaceScopes = mod->namespacePath ? mod->namespacePath->entries.size() : 0;
+	size_t namespace_scopes = mod->namespace_path ? mod->namespace_path->entries.size() : 0;
 
 	for (size_t i = 0; i < enums.size(); ++i) {
-		AstNodePtr<EnumNode> curEnum = mod->members.at(enums.at(i)).castTo<EnumNode>();
+		AstNodePtr<EnumNode> cur_enum = mod->members.at(enums.at(i)).cast_to<EnumNode>();
 
 		if (i)
-			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("\n"));
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(fillEnum(*this, curEnum));
+		INTERBUFC_RETURN_IF_COMP_ERROR(fill_enum(*this, cur_enum));
 
-		switch (curEnum->baseType->typeNameKind) {
+		switch (cur_enum->base_type->type_name_kind) {
 			case TypeNameKind::I8:
 			case TypeNameKind::I16:
 			case TypeNameKind::I32:
@@ -354,110 +354,110 @@ INTERBUFC_API std::optional<CompilationError> TypeScriptCompiler::compile(
 			case TypeNameKind::F32:
 			case TypeNameKind::F64:
 			case TypeNameKind::Bool: {
-				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +0));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, +0));
 
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("export const "));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curEnum->name));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = {\n"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("export const "));
+				INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(cur_enum->name));
+				INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(" = {\n"));
 
-				for (size_t j = 0; j < curEnum->members.size(); ++j) {
-					auto m = curEnum->members.at(j);
-					assert(m->astNodeType == AstNodeType::EnumItem);
+				for (size_t j = 0; j < cur_enum->members.size(); ++j) {
+					auto m = cur_enum->members.at(j);
+					assert(m->ast_node_type == AstNodeType::EnumItem);
 
-					INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+					INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, +1));
 
-					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(m->name));
-					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(": "));
-					INTERBUFC_RETURN_IF_COMP_ERROR(_writeExpr(sourceFileOut, m.castTo<EnumItemNode>()->value));
-					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" as "));
-					INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageTypeName(sourceFileOut, curEnum->baseType));
+					INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(m->name));
+					INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(": "));
+					INTERBUFC_RETURN_IF_COMP_ERROR(_write_expr(source_file_out, m.cast_to<EnumItemNode>()->value));
+					INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(" as "));
+					INTERBUFC_RETURN_IF_COMP_ERROR(_write_internal_storage_type_name(source_file_out, cur_enum->base_type));
 
-					if (j + 1 < curEnum->members.size())
-						INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(","));
+					if (j + 1 < cur_enum->members.size())
+						INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(","));
 
-					INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+					INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("\n"));
 				}
 
-				INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, 0));
-				INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("} as const;\n"));
+				INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, 0));
+				INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("} as const;\n"));
 				break;
 			}
 			case TypeNameKind::String:
-				return CompilationError(curEnum->baseType->tokenRange, CompilationErrorKind::InvalidEnumBaseType);
+				return CompilationError(cur_enum->base_type->token_range, CompilationErrorKind::InvalidEnumBaseType);
 			case TypeNameKind::Custom:
-				return CompilationError(curEnum->baseType->tokenRange, CompilationErrorKind::InvalidEnumBaseType);
+				return CompilationError(cur_enum->base_type->token_range, CompilationErrorKind::InvalidEnumBaseType);
 			default:
 				std::terminate();
 		}
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("type "));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curEnum->name));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" = typeof "));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curEnum->name));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("[keyof typeof "));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curEnum->name));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("];\n"));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("type "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(cur_enum->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(" = typeof "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(cur_enum->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("[keyof typeof "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(cur_enum->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("];\n"));
 	}
 
-	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+	INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("\n"));
 
 	for (size_t i = 0; i < structs.size(); ++i) {
-		AstNodePtr<StructNode> curStruct = mod->members.at(structs.at(i)).castTo<StructNode>();
+		AstNodePtr<StructNode> cur_struct = mod->members.at(structs.at(i)).cast_to<StructNode>();
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +0));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, +0));
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interface "));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curStruct->name));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" {\n"));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("interface "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(cur_struct->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(" {\n"));
 
-		for (size_t j = 0; j < curStruct->members.size(); ++j) {
-			AstNodePtr<VarNode> curVar = curStruct->members.at(j).castTo<VarNode>();
+		for (size_t j = 0; j < cur_struct->members.size(); ++j) {
+			AstNodePtr<VarNode> cur_var = cur_struct->members.at(j).cast_to<VarNode>();
 
-			assert(curVar->astNodeType == AstNodeType::Var);
+			assert(cur_var->ast_node_type == AstNodeType::Var);
 
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, +1));
 
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageName(sourceFileOut, curVar->name));
-			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(": "));
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageTypeName(sourceFileOut, curVar->type));
-			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_write_internal_storage_name(source_file_out, cur_var->name));
+			INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(": "));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_write_internal_storage_type_name(source_file_out, cur_var->type));
+			INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(";\n"));
 		}
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +0));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, +0));
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("}\n"));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("}\n"));
 	}
 
-	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+	INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("\n"));
 
 	for (size_t i = 0; i < classes.size(); ++i) {
-		AstNodePtr<ClassNode> curClass = mod->members.at(classes.at(i)).castTo<ClassNode>();
+		AstNodePtr<ClassNode> cur_class = mod->members.at(classes.at(i)).cast_to<ClassNode>();
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +0));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, +0));
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("interface "));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(curClass->name));
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(" {\n"));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("interface "));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(cur_class->name));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(" {\n"));
 
-		for (size_t j = 0; j < curClass->members.size(); ++j) {
-			AstNodePtr<VarNode> curVar = curClass->members.at(j).castTo<VarNode>();
+		for (size_t j = 0; j < cur_class->members.size(); ++j) {
+			AstNodePtr<VarNode> cur_var = cur_class->members.at(j).cast_to<VarNode>();
 
-			assert(curVar->astNodeType == AstNodeType::Var);
+			assert(cur_var->ast_node_type == AstNodeType::Var);
 
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +1));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, +1));
 
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageName(sourceFileOut, curVar->name));
-			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(": "));
-			INTERBUFC_RETURN_IF_COMP_ERROR(_writeInternalStorageTypeName(sourceFileOut, curVar->type));
-			INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write(";\n"));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_write_internal_storage_name(source_file_out, cur_var->name));
+			INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(": "));
+			INTERBUFC_RETURN_IF_COMP_ERROR(_write_internal_storage_type_name(source_file_out, cur_var->type));
+			INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write(";\n"));
 		}
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(_writeIndent(sourceFileOut, +0));
+		INTERBUFC_RETURN_IF_COMP_ERROR(_write_indent(source_file_out, +0));
 
-		INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("}\n"));
+		INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("}\n"));
 	}
 
-	INTERBUFC_RETURN_IF_COMP_ERROR(sourceFileOut.write("\n"));
+	INTERBUFC_RETURN_IF_COMP_ERROR(source_file_out.write("\n"));
 
 	return {};
 }

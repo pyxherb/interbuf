@@ -8,16 +8,16 @@ struct OptionMatchContext {
 	const int argc;
 	char **const argv;
 	int i;
-	void *userData;
+	void *user_data;
 };
 
 struct SingleArgOption;
 
-typedef int (*ArglessOptionCallback)(const OptionMatchContext &matchContext, const char *option);
-typedef int (*SingleArgOptionCallback)(const OptionMatchContext &matchContext, const char *option, const char *arg);
-typedef int (*CustomOptionCallback)(OptionMatchContext &matchContext, const char *option);
-typedef int (*FallbackOptionCallback)(OptionMatchContext &matchContext, const char *option);
-typedef void (*RequireOptionArgCallback)(const OptionMatchContext &matchContext, const SingleArgOption &option);
+typedef int (*ArglessOptionCallback)(const OptionMatchContext &match_context, const char *option);
+typedef int (*SingleArgOptionCallback)(const OptionMatchContext &match_context, const char *option, const char *arg);
+typedef int (*CustomOptionCallback)(OptionMatchContext &match_context, const char *option);
+typedef int (*FallbackOptionCallback)(OptionMatchContext &match_context, const char *option);
+typedef void (*RequireOptionArgCallback)(const OptionMatchContext &match_context, const SingleArgOption &option);
 
 struct ArglessOption {
 	const char *name;
@@ -39,34 +39,34 @@ using SingleArgOptionMap = std::initializer_list<SingleArgOption>;
 using CustomOptionMap = std::initializer_list<CustomOption>;
 
 struct CompiledOptionMap {
-	peff::HashMap<std::string_view, const ArglessOption *> arglessOptions;
-	peff::HashMap<std::string_view, const SingleArgOption *> singleArgOptions;
-	peff::HashMap<std::string_view, const CustomOption *> customOptions;
-	FallbackOptionCallback fallbackOptionCallback;
-	RequireOptionArgCallback requireOptionArgCallback;
+	peff::HashMap<std::string_view, const ArglessOption *> argless_options;
+	peff::HashMap<std::string_view, const SingleArgOption *> single_arg_options;
+	peff::HashMap<std::string_view, const CustomOption *> custom_options;
+	FallbackOptionCallback fallback_option_callback;
+	RequireOptionArgCallback require_option_arg_callback;
 
-	INTERBUFC_FORCEINLINE CompiledOptionMap(peff::Alloc *alloc, FallbackOptionCallback fallbackOptionCallback, RequireOptionArgCallback requireOptionArgCallback) noexcept : arglessOptions(alloc), singleArgOptions(alloc), customOptions(alloc), fallbackOptionCallback(fallbackOptionCallback), requireOptionArgCallback(requireOptionArgCallback) {}
+	INTERBUFC_FORCEINLINE CompiledOptionMap(peff::Alloc *alloc, FallbackOptionCallback fallback_option_callback, RequireOptionArgCallback require_option_arg_callback) noexcept : argless_options(alloc), single_arg_options(alloc), custom_options(alloc), fallback_option_callback(fallback_option_callback), require_option_arg_callback(require_option_arg_callback) {}
 };
 
-[[nodiscard]] bool buildOptionMap(
-	CompiledOptionMap &optionMapOut,
-	const ArglessOptionMap &arglessOptions,
-	const SingleArgOptionMap &singleArgOptions,
-	const CustomOptionMap &customOptions) {
-	for (const auto &i : arglessOptions) {
-		if (!optionMapOut.arglessOptions.insert(std::string_view(i.name), &i)) {
+[[nodiscard]] bool build_option_map(
+	CompiledOptionMap &option_map_out,
+	const ArglessOptionMap &argless_options,
+	const SingleArgOptionMap &single_arg_options,
+	const CustomOptionMap &custom_options) {
+	for (const auto &i : argless_options) {
+		if (!option_map_out.argless_options.insert(std::string_view(i.name), &i)) {
 			return false;
 		}
 	}
 
-	for (const auto &i : singleArgOptions) {
-		if (!optionMapOut.singleArgOptions.insert(std::string_view(i.name), &i)) {
+	for (const auto &i : single_arg_options) {
+		if (!option_map_out.single_arg_options.insert(std::string_view(i.name), &i)) {
 			return false;
 		}
 	}
 
-	for (const auto &i : customOptions) {
-		if (!optionMapOut.customOptions.insert(std::string_view(i.name), &i)) {
+	for (const auto &i : custom_options) {
+		if (!option_map_out.custom_options.insert(std::string_view(i.name), &i)) {
 			return false;
 		}
 	}
@@ -74,40 +74,40 @@ struct CompiledOptionMap {
 	return true;
 }
 
-[[nodiscard]] int matchArgs(const CompiledOptionMap &optionMap, int argc, char **argv, void *userData) {
-	OptionMatchContext matchContext = { argc, argv, 0, userData };
+[[nodiscard]] int match_args(const CompiledOptionMap &option_map, int argc, char **argv, void *user_data) {
+	OptionMatchContext match_context = { argc, argv, 0, user_data };
 	for (int i = 1; i < argc; ++i) {
-		if (auto it = optionMap.arglessOptions.find(std::string_view(argv[i])); it != optionMap.arglessOptions.end()) {
-			if (int result = it.value()->callback(matchContext, argv[i]); result) {
+		if (auto it = option_map.argless_options.find(std::string_view(argv[i])); it != option_map.argless_options.end()) {
+			if (int result = it.value()->callback(match_context, argv[i]); result) {
 				return result;
 			}
 
 			continue;
 		}
 
-		if (auto it = optionMap.singleArgOptions.find(std::string_view(argv[i])); it != optionMap.singleArgOptions.end()) {
+		if (auto it = option_map.single_arg_options.find(std::string_view(argv[i])); it != option_map.single_arg_options.end()) {
 			const char *opt = argv[i];
 			if (++i == argc) {
-				optionMap.requireOptionArgCallback(matchContext, *it.value());
+				option_map.require_option_arg_callback(match_context, *it.value());
 				return EINVAL;
 			}
 
-			if (int result = it.value()->callback(matchContext, opt, argv[i]); result) {
+			if (int result = it.value()->callback(match_context, opt, argv[i]); result) {
 				return result;
 			}
 
 			continue;
 		}
 
-		if (auto it = optionMap.customOptions.find(std::string_view(argv[i])); it != optionMap.customOptions.end()) {
-			if (int result = it.value()->callback(matchContext, argv[i]); result) {
+		if (auto it = option_map.custom_options.find(std::string_view(argv[i])); it != option_map.custom_options.end()) {
+			if (int result = it.value()->callback(match_context, argv[i]); result) {
 				return result;
 			}
 
 			continue;
 		}
 
-		if (int result = optionMap.fallbackOptionCallback(matchContext, argv[i]); result) {
+		if (int result = option_map.fallback_option_callback(match_context, argv[i]); result) {
 			return result;
 		}
 	}
@@ -115,22 +115,22 @@ struct CompiledOptionMap {
 	return 0;
 }
 
-#define printError(fmt, ...) fprintf(stderr, "Error: " fmt, ##__VA_ARGS__)
+#define print_error(fmt, ...) fprintf(stderr, "Error: " fmt, ##__VA_ARGS__)
 
 struct MatchUserData {
-	peff::DynArray<peff::String> *includeDirs;
+	peff::DynArray<peff::String> *include_dirs;
 };
 
-const ArglessOptionMap g_arglessOptions = {
+const ArglessOptionMap g_argless_options = {
 
 };
 
-const SingleArgOptionMap g_singleArgOptions = {
-	{ "-l", [](const OptionMatchContext &matchContext, const char *option, const char *arg) -> int {
-		 MatchUserData *userData = ((MatchUserData *)matchContext.userData);
+const SingleArgOptionMap g_single_arg_options = {
+	{ "-l", [](const OptionMatchContext &match_context, const char *option, const char *arg) -> int {
+		 MatchUserData *user_data = ((MatchUserData *)match_context.user_data);
 
 		 if (!interbufc::g_language.empty()) {
-			 printError("Language is specified multiple times");
+			 print_error("Language is specified multiple times");
 			 return EINVAL;
 		 }
 
@@ -138,190 +138,190 @@ const SingleArgOptionMap g_singleArgOptions = {
 
 		 return 0;
 	 } },
-	{ "-I", [](const OptionMatchContext &matchContext, const char *option, const char *arg) -> int {
-		 MatchUserData *userData = ((MatchUserData *)matchContext.userData);
+	{ "-I", [](const OptionMatchContext &match_context, const char *option, const char *arg) -> int {
+		 MatchUserData *user_data = ((MatchUserData *)match_context.user_data);
 
-		 peff::String dir(peff::getDefaultAlloc());
+		 peff::String dir(peff::default_allocator());
 
 		 if (!dir.build(arg)) {
-			 printError("Out of memory");
+			 print_error("Out of memory");
 			 return ENOMEM;
 		 }
 
-		 if (!userData->includeDirs->pushBack(std::move(dir))) {
-			 printError("Out of memory");
+		 if (!user_data->include_dirs->push_back(std::move(dir))) {
+			 print_error("Out of memory");
 			 return ENOMEM;
 		 }
 
 		 return 0;
 	 } },
-	{ "-o", [](const OptionMatchContext &matchContext, const char *option, const char *arg) -> int {
-		 interbufc::g_outputDirectoryPath = arg;
+	{ "-o", [](const OptionMatchContext &match_context, const char *option, const char *arg) -> int {
+		 interbufc::g_output_directory_path = arg;
 
 		 return 0;
 	 } }
 };
 
-const CustomOptionMap g_customOptions = {
+const CustomOptionMap g_custom_options = {
 
 };
 
-void dumpLexicalError(const interbufc::LexicalError &lexicalError, int indentLevel = 0) {
-	for (int i = 0; i < indentLevel; ++i) {
+void dump_lexical_error(const interbufc::LexicalError &lexical_error, int indent_level = 0) {
+	for (int i = 0; i < indent_level; ++i) {
 		putc('\t', stderr);
 	}
 
-	switch (lexicalError.kind) {
+	switch (lexical_error.kind) {
 		case interbufc::LexicalErrorKind::UnrecognizedToken:
-			printError("Syntax error at %zu, %zu: Unrecognized token\n",
-				lexicalError.location.beginPosition.line + 1,
-				lexicalError.location.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Unrecognized token\n",
+				lexical_error.location.begin_position.line + 1,
+				lexical_error.location.begin_position.column + 1);
 			break;
 		case interbufc::LexicalErrorKind::UnexpectedEndOfLine:
-			printError("Syntax error at %zu, %zu: Unexpected end of line\n",
-				lexicalError.location.beginPosition.line + 1,
-				lexicalError.location.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Unexpected end of line\n",
+				lexical_error.location.begin_position.line + 1,
+				lexical_error.location.begin_position.column + 1);
 			break;
 		case interbufc::LexicalErrorKind::PrematuredEndOfFile:
-			printError("Syntax error at %zu, %zu: Prematured end of file\n",
-				lexicalError.location.beginPosition.line + 1,
-				lexicalError.location.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Prematured end of file\n",
+				lexical_error.location.begin_position.line + 1,
+				lexical_error.location.begin_position.column + 1);
 			break;
 		case interbufc::LexicalErrorKind::OutOfMemory:
-			printError("Out of memory during lexical analysis\n");
+			print_error("Out of memory during lexical analysis\n");
 			break;
 	}
 }
 
-void dumpSyntaxError(interbufc::Parser *parser, const interbufc::SyntaxError &syntaxError, int indentLevel = 0) {
-	const interbufc::Token *beginToken = parser->tokenList.at(syntaxError.tokenRange.beginIndex).get();
-	const interbufc::Token *endToken = parser->tokenList.at(syntaxError.tokenRange.endIndex).get();
+void dump_syntax_error(interbufc::Parser *parser, const interbufc::SyntaxError &syntax_error, int indent_level = 0) {
+	const interbufc::Token *begin_token = parser->token_list.at(syntax_error.token_range.begin_index).get();
+	const interbufc::Token *end_token = parser->token_list.at(syntax_error.token_range.end_index).get();
 
-	for (int i = 0; i < indentLevel; ++i) {
+	for (int i = 0; i < indent_level; ++i) {
 		putc('\t', stderr);
 	}
 
-	switch (syntaxError.errorKind) {
+	switch (syntax_error.error_kind) {
 		case interbufc::SyntaxErrorKind::OutOfMemory:
-			printError("Syntax error at %zu, %zu: Out of memory\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Out of memory\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::SyntaxErrorKind::UnexpectedToken:
-			printError("Syntax error at %zu, %zu: Unexpected token\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Unexpected token\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::SyntaxErrorKind::ExpectingSingleToken:
-			printError("Syntax error at %zu, %zu: Expecting %s\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1,
-				interbufc::getTokenName(std::get<interbufc::ExpectingSingleTokenErrorExData>(syntaxError.exData).expectingTokenId));
+			print_error("Syntax error at %zu, %zu: Expecting %s\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1,
+				interbufc::get_token_name(std::get<interbufc::ExpectingSingleTokenErrorExData>(syntax_error.ex_data).expecting_token_id));
 			break;
 		case interbufc::SyntaxErrorKind::ExpectingTokens: {
-			printError("Syntax error at %zu, %zu: Expecting ",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Expecting ",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 
-			const interbufc::ExpectingTokensErrorExData &exData = std::get<interbufc::ExpectingTokensErrorExData>(syntaxError.exData);
+			const interbufc::ExpectingTokensErrorExData &ex_data = std::get<interbufc::ExpectingTokensErrorExData>(syntax_error.ex_data);
 
-			auto it = exData.expectingTokenIds.begin();
+			auto it = ex_data.expecting_token_ids.begin();
 
-			fprintf(stderr, "%s", interbufc::getTokenName(*it));
+			fprintf(stderr, "%s", interbufc::get_token_name(*it));
 
-			while (++it != exData.expectingTokenIds.end()) {
-				fprintf(stderr, " or %s", interbufc::getTokenName(*it));
+			while (++it != ex_data.expecting_token_ids.end()) {
+				fprintf(stderr, " or %s", interbufc::get_token_name(*it));
 			}
 
 			fprintf(stderr, "\n");
 			break;
 		}
 		case interbufc::SyntaxErrorKind::ExpectingId:
-			printError("Syntax error at %zu, %zu: Expecting an identifier\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Expecting an identifier\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::SyntaxErrorKind::ExpectingExpr:
-			printError("Syntax error at %zu, %zu: Expecting an expression\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Expecting an expression\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::SyntaxErrorKind::ExpectingStmt:
-			printError("Syntax error at %zu, %zu: Expecting a statement\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Expecting a statement\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::SyntaxErrorKind::ExpectingDecl:
-			printError("Syntax error at %zu, %zu: Expecting a declaration\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Expecting a declaration\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::SyntaxErrorKind::NoMatchingTokensFound:
-			printError("Syntax error at %zu, %zu: Matching token not found\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Matching token not found\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::SyntaxErrorKind::ConflictingDefinitions: {
-			printError("Syntax error at %zu, %zu: Definition of `",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Syntax error at %zu, %zu: Definition of `",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 
-			const interbufc::ConflictingDefinitionsErrorExData &exData = std::get<interbufc::ConflictingDefinitionsErrorExData>(syntaxError.exData);
+			const interbufc::ConflictingDefinitionsErrorExData &ex_data = std::get<interbufc::ConflictingDefinitionsErrorExData>(syntax_error.ex_data);
 
-			fprintf(stderr, "%s' conflicts with other definitions\n", exData.memberName.data());
+			fprintf(stderr, "%s' conflicts with other definitions\n", ex_data.member_name.data());
 			break;
 		}
 		default:
-			printError("Syntax error at %zu, %zu: Unknown error (%d)\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1,
-				(int)syntaxError.errorKind);
+			print_error("Syntax error at %zu, %zu: Unknown error (%d)\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1,
+				(int)syntax_error.error_kind);
 			break;
 	}
 }
 
-void dumpCompilationError(peff::SharedPtr<interbufc::Parser> parser, const interbufc::CompilationError &error, int indentLevel = 0) {
-	const interbufc::Token *beginToken = parser->tokenList.at(error.tokenRange.beginIndex).get();
-	const interbufc::Token *endToken = parser->tokenList.at(error.tokenRange.endIndex).get();
+void dump_compilation_error(peff::SharedPtr<interbufc::Parser> parser, const interbufc::CompilationError &error, int indent_level = 0) {
+	const interbufc::Token *begin_token = parser->token_list.at(error.token_range.begin_index).get();
+	const interbufc::Token *end_token = parser->token_list.at(error.token_range.end_index).get();
 
-	for (int i = 0; i < indentLevel; ++i) {
+	for (int i = 0; i < indent_level; ++i) {
 		putc('\t', stderr);
 	}
 
-	switch (error.errorKind) {
+	switch (error.error_kind) {
 		case interbufc::CompilationErrorKind::OutOfMemory:
-			printError("Error at %zu, %zu: Out of memory\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Error at %zu, %zu: Out of memory\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::CompilationErrorKind::ErrorOpeningFile: {
-			const interbufc::ErrorOpeningFileError &e = std::get<interbufc::ErrorOpeningFileError>(error.exData);
-			printError("Error at %zu, %zu: Error opening file: %s\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1,
+			const interbufc::ErrorOpeningFileError &e = std::get<interbufc::ErrorOpeningFileError>(error.ex_data);
+			print_error("Error at %zu, %zu: Error opening file: %s\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1,
 				e.name.data());
 			break;
 		}
 		case interbufc::CompilationErrorKind::IO:
-			printError("Error at %zu, %zu: File I/O error\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Error at %zu, %zu: File I/O error\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::CompilationErrorKind::InvalidEnumBaseType:
-			printError("Error at %zu, %zu: Invalid base type for enumeration\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Error at %zu, %zu: Invalid base type for enumeration\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		case interbufc::CompilationErrorKind::InvalidTypeName:
-			printError("Error at %zu, %zu: Invalid type name\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1);
+			print_error("Error at %zu, %zu: Invalid type name\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1);
 			break;
 		default:
-			printError("Error at %zu, %zu: Unknown error (%d)\n",
-				beginToken->sourceLocation.beginPosition.line + 1,
-				beginToken->sourceLocation.beginPosition.column + 1,
-				(int)error.errorKind);
+			print_error("Error at %zu, %zu: Unknown error (%d)\n",
+				begin_token->source_location.begin_position.line + 1,
+				begin_token->source_location.begin_position.column + 1,
+				(int)error.error_kind);
 			break;
 	}
 }
@@ -331,73 +331,73 @@ int main(int argc, char *argv[]) {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	peff::DynArray<peff::String> includeDirs(peff::getDefaultAlloc());
+	peff::DynArray<peff::String> include_dirs(peff::default_allocator());
 	{
-		CompiledOptionMap optionMap(
-			peff::getDefaultAlloc(),
-			[](OptionMatchContext &matchContext, const char *option) -> int {
-				if (interbufc::g_sourceFileName.size()) {
-					printError("Duplicated target file name");
+		CompiledOptionMap option_map(
+			peff::default_allocator(),
+			[](OptionMatchContext &match_context, const char *option) -> int {
+				if (interbufc::g_source_file_name.size()) {
+					print_error("Duplicated target file name");
 					return EINVAL;
 				}
 
-				interbufc::g_sourceFileName = option;
+				interbufc::g_source_file_name = option;
 
 				return 0;
 			},
-			[](const OptionMatchContext &matchContext, const SingleArgOption &option) {
-				printError("Option `%s' requires more arguments", option.name);
+			[](const OptionMatchContext &match_context, const SingleArgOption &option) {
+				print_error("Option `%s' requires more arguments", option.name);
 			});
 
-		if (!buildOptionMap(optionMap, g_arglessOptions, g_singleArgOptions, g_customOptions)) {
-			printError("Out of memory");
+		if (!build_option_map(option_map, g_argless_options, g_single_arg_options, g_custom_options)) {
+			print_error("Out of memory");
 			return ENOMEM;
 		}
 
 		{
-			MatchUserData matchUserData = {};
-			matchUserData.includeDirs = &includeDirs;
+			MatchUserData match_user_data = {};
+			match_user_data.include_dirs = &include_dirs;
 
-			if (int result = matchArgs(optionMap, argc, argv, &matchUserData); result) {
+			if (int result = match_args(option_map, argc, argv, &match_user_data); result) {
 				return result;
 			}
 		}
 	}
 
-	if (interbufc::g_sourceFileName.empty()) {
-		printError("Missing target file name");
+	if (interbufc::g_source_file_name.empty()) {
+		print_error("Missing target file name");
 		return EINVAL;
 	}
 
-	if (interbufc::g_outputDirectoryPath.empty()) {
-		printError("Missing output path");
+	if (interbufc::g_output_directory_path.empty()) {
+		print_error("Missing output path");
 		return EINVAL;
 	}
 
-	FILE *fp = fopen(interbufc::g_sourceFileName.data(), "rb");
+	FILE *fp = fopen(interbufc::g_source_file_name.data(), "rb");
 
 	if (!fp) {
-		printError("Error opening the file");
+		print_error("Error opening the file");
 		return EIO;
 	}
 
-	peff::ScopeGuard closeFpGuard([fp]() noexcept {
+	peff::ScopeGuard close_fp_guard([fp]() noexcept {
 		fclose(fp);
 	});
 
 	if (fseek(fp, 0, SEEK_END)) {
-		printError("Error evaluating file size");
+		print_error("Error evaluating file size");
 		return EIO;
 	}
 
-	long fileSize;
-	if ((fileSize = ftell(fp)) < 1) {
-		printError("Error evaluating file size");
+	long file_size;
+	if ((file_size = ftell(fp)) < 1) {
+		print_error("Error evaluating file size");
 		return EIO;
 	}
 
 	if (fseek(fp, 0, SEEK_SET)) {
-		printError("Error evaluating file size");
+		print_error("Error evaluating file size");
 		return EIO;
 	}
 
@@ -405,128 +405,128 @@ int main(int argc, char *argv[]) {
 		auto deleter = [](char *ptr) {
 			free(ptr);
 		};
-		std::unique_ptr<char[], decltype(deleter)> buf((char *)malloc((size_t)fileSize + 1), deleter);
+		std::unique_ptr<char[], decltype(deleter)> buf((char *)malloc((size_t)file_size + 1), deleter);
 
 		if (!buf) {
-			printError("Error allocating memory for reading the file");
+			print_error("Error allocating memory for reading the file");
 			return ENOMEM;
 		}
 
-		(buf.get())[fileSize] = '\0';
+		(buf.get())[file_size] = '\0';
 
-		if (fread(buf.get(), fileSize, 1, fp) < 1) {
-			printError("Error reading the file");
+		if (fread(buf.get(), file_size, 1, fp) < 1) {
+			print_error("Error reading the file");
 			return EIO;
 		}
 
-		peff::SharedPtr<interbufc::Document> document(peff::makeShared<interbufc::Document>(peff::getDefaultAlloc(), peff::getDefaultAlloc()));
+		peff::SharedPtr<interbufc::Document> document(peff::make_shared<interbufc::Document>(peff::default_allocator(), peff::default_allocator()));
 
-		/* peff::SharedPtr<interbufc::FileSystemExternalModuleProvider> fsExternalModProvider;
+		/* peff::SharedPtr<interbufc::FileSystemExternalModuleProvider> fs_external_mod_provider;
 
-		if (!(fsExternalModProvider = peff::makeShared<interbufc::FileSystemExternalModuleProvider>(peff::getDefaultAlloc(), peff::getDefaultAlloc()))) {
-			printError("Out of memory");
+		if (!(fs_external_mod_provider = peff::make_shared<interbufc::FileSystemExternalModuleProvider>(peff::default_allocator(), peff::default_allocator()))) {
+			print_error("Out of memory");
 			return ENOMEM;
 		}
 
-		for (auto &i : includeDirs) {
-			if (!fsExternalModProvider->importPaths.pushBack(std::move(i))) {
-				printError("Out of memory");
+		for (auto &i : include_dirs) {
+			if (!fs_external_mod_provider->import_paths.push_back(std::move(i))) {
+				print_error("Out of memory");
 				return ENOMEM;
 			}
 		}
 
-		includeDirs.clear();
+		include_dirs.clear();
 
-		if (!document->externalModuleProviders.pushBack(fsExternalModProvider.castTo<interbufc::ExternalModuleProvider>())) {
-			printError("Out of memory");
+		if (!document->external_module_providers.push_back(fs_external_mod_provider.cast_to<interbufc::ExternalModuleProvider>())) {
+			print_error("Out of memory");
 			return ENOMEM;
 		}*/
 
 		if (interbufc::g_language.empty()) {
-			printError("Language is not specified");
+			print_error("Language is not specified");
 			return EINVAL;
 		}
 
-		if (interbufc::g_outputDirectoryPath.empty()) {
-			printError("Output directory is not specified");
+		if (interbufc::g_output_directory_path.empty()) {
+			print_error("Output directory is not specified");
 			return EINVAL;
 		}
 
-		interbufc::TokenList tokenList(peff::getDefaultAlloc());
+		interbufc::TokenList token_list(peff::default_allocator());
 		{
-			interbufc::Lexer lexer(peff::getDefaultAlloc());
+			interbufc::Lexer lexer(peff::default_allocator());
 
-			std::string_view sv(buf.get(), fileSize);
+			std::string_view sv(buf.get(), file_size);
 
-			if (auto e = lexer.lex(sv, peff::getDefaultAlloc(), document); e) {
-				dumpLexicalError(*e);
+			if (auto e = lexer.lex(sv, peff::default_allocator(), document); e) {
+				dump_lexical_error(*e);
 				return -1;
 			}
 
-			tokenList = std::move(lexer.tokenList);
+			token_list = std::move(lexer.token_list);
 		}
 
 		{
 			peff::SharedPtr<interbufc::Parser> parser;
-			if (!(parser = peff::makeShared<interbufc::Parser>(peff::getDefaultAlloc(), document, std::move(tokenList), peff::getDefaultAlloc()))) {
-				printError("Error allocating memory for the parser");
+			if (!(parser = peff::make_shared<interbufc::Parser>(peff::default_allocator(), document, std::move(token_list), peff::default_allocator()))) {
+				print_error("Error allocating memory for the parser");
 				return ENOMEM;
 			}
 
-			interbufc::AstNodePtr<interbufc::ModuleNode> rootMod;
-			if (!(rootMod = peff::makeSharedWithControlBlock<interbufc::ModuleNode, interbufc::AstNodeControlBlock<interbufc::ModuleNode>>(peff::getDefaultAlloc(), peff::getDefaultAlloc(), document))) {
-				printError("Error allocating memory for the root module");
+			interbufc::AstNodePtr<interbufc::ModuleNode> root_mod;
+			if (!(root_mod = peff::make_shared_with_control_block<interbufc::ModuleNode, interbufc::AstNodeControlBlock<interbufc::ModuleNode>>(peff::default_allocator(), peff::default_allocator(), document))) {
+				print_error("Error allocating memory for the root module");
 				return ENOMEM;
 			}
-			document->rootModule = rootMod;
+			document->root_module = root_mod;
 
-			interbufc::AstNodePtr<interbufc::ModuleNode> mod(peff::makeSharedWithControlBlock<interbufc::ModuleNode, interbufc::AstNodeControlBlock<interbufc::ModuleNode>>(peff::getDefaultAlloc(), peff::getDefaultAlloc(), document));
-			if (!(mod = peff::makeSharedWithControlBlock<interbufc::ModuleNode, interbufc::AstNodeControlBlock<interbufc::ModuleNode>>(peff::getDefaultAlloc(), peff::getDefaultAlloc(), document))) {
-				printError("Error allocating memory for the target module");
+			interbufc::AstNodePtr<interbufc::ModuleNode> mod(peff::make_shared_with_control_block<interbufc::ModuleNode, interbufc::AstNodeControlBlock<interbufc::ModuleNode>>(peff::default_allocator(), peff::default_allocator(), document));
+			if (!(mod = peff::make_shared_with_control_block<interbufc::ModuleNode, interbufc::AstNodeControlBlock<interbufc::ModuleNode>>(peff::default_allocator(), peff::default_allocator(), document))) {
+				print_error("Error allocating memory for the target module");
 				return ENOMEM;
 			}
 
-			bool encounteredErrors = false;
-			if (auto e = parser->parseProgram(mod); e) {
-				encounteredErrors = true;
-				dumpSyntaxError(parser.get(), *e);
+			bool encountered_errors = false;
+			if (auto e = parser->parse_program(mod); e) {
+				encountered_errors = true;
+				dump_syntax_error(parser.get(), *e);
 			}
 
-			for (auto &i : parser->syntaxErrors) {
-				encounteredErrors = true;
-				dumpSyntaxError(parser.get(), i);
+			for (auto &i : parser->syntax_errors) {
+				encountered_errors = true;
+				dump_syntax_error(parser.get(), i);
 			}
 
 			if (interbufc::g_language == "cpp") {
-				interbufc::CXXCompiler compiler(peff::getDefaultAlloc());
+				interbufc::CXXCompiler compiler(peff::default_allocator());
 
 				std::optional<interbufc::CompilationError> e = compiler.compile(mod);
 
 				if (e) {
-					encounteredErrors = true;
-					dumpCompilationError(parser, *e, 0);
+					encountered_errors = true;
+					dump_compilation_error(parser, *e, 0);
 				}
 
 				for (auto &i : compiler.errors) {
-					encounteredErrors = true;
-					dumpCompilationError(parser, i, 0);
+					encountered_errors = true;
+					dump_compilation_error(parser, i, 0);
 				}
 			} else if (interbufc::g_language == "ts") {
-				interbufc::TypeScriptCompiler compiler(peff::getDefaultAlloc());
+				interbufc::TypeScriptCompiler compiler(peff::default_allocator());
 
 				std::optional<interbufc::CompilationError> e = compiler.compile(mod);
 
 				if (e) {
-					encounteredErrors = true;
-					dumpCompilationError(parser, *e, 0);
+					encountered_errors = true;
+					dump_compilation_error(parser, *e, 0);
 				}
 
 				for (auto &i : compiler.errors) {
-					encounteredErrors = true;
-					dumpCompilationError(parser, i, 0);
+					encountered_errors = true;
+					dump_compilation_error(parser, i, 0);
 				}
 			} else {
-				printError("Unrecognized language");
+				print_error("Unrecognized language");
 				return EINVAL;
 			}
 		}

@@ -2,287 +2,287 @@
 
 using namespace interbufc;
 
-INTERBUFC_API AstNodePtr<AstNode> I8TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<I8TypeNameNode> duplicatedNode(makeAstNode<I8TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> I8TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<I8TypeNameNode> duplicated_node(make_ast_node<I8TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API I8TypeNameNode::I8TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::I8, selfAllocator, document) {
+INTERBUFC_API I8TypeNameNode::I8TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::I8, self_allocator, document) {
 }
 
-INTERBUFC_API I8TypeNameNode::I8TypeNameNode(const I8TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API I8TypeNameNode::I8TypeNameNode(const I8TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API I8TypeNameNode::~I8TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> I16TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<I16TypeNameNode> duplicatedNode(makeAstNode<I16TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> I16TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<I16TypeNameNode> duplicated_node(make_ast_node<I16TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API I16TypeNameNode::I16TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::I16, selfAllocator, document) {
+INTERBUFC_API I16TypeNameNode::I16TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::I16, self_allocator, document) {
 }
 
-INTERBUFC_API I16TypeNameNode::I16TypeNameNode(const I16TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API I16TypeNameNode::I16TypeNameNode(const I16TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API I16TypeNameNode::~I16TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> I32TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<I32TypeNameNode> duplicatedNode(makeAstNode<I32TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> I32TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<I32TypeNameNode> duplicated_node(make_ast_node<I32TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API I32TypeNameNode::I32TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::I32, selfAllocator, document) {
+INTERBUFC_API I32TypeNameNode::I32TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::I32, self_allocator, document) {
 }
 
-INTERBUFC_API I32TypeNameNode::I32TypeNameNode(const I32TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API I32TypeNameNode::I32TypeNameNode(const I32TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API I32TypeNameNode::~I32TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> I64TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<I64TypeNameNode> duplicatedNode(makeAstNode<I64TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> I64TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<I64TypeNameNode> duplicated_node(make_ast_node<I64TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API I64TypeNameNode::I64TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::I64, selfAllocator, document) {
+INTERBUFC_API I64TypeNameNode::I64TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::I64, self_allocator, document) {
 }
 
-INTERBUFC_API I64TypeNameNode::I64TypeNameNode(const I64TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API I64TypeNameNode::I64TypeNameNode(const I64TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API I64TypeNameNode::~I64TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> U8TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<U8TypeNameNode> duplicatedNode(makeAstNode<U8TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> U8TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<U8TypeNameNode> duplicated_node(make_ast_node<U8TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API U8TypeNameNode::U8TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::U8, selfAllocator, document) {
+INTERBUFC_API U8TypeNameNode::U8TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::U8, self_allocator, document) {
 }
 
-INTERBUFC_API U8TypeNameNode::U8TypeNameNode(const U8TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API U8TypeNameNode::U8TypeNameNode(const U8TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API U8TypeNameNode::~U8TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> U16TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<U16TypeNameNode> duplicatedNode(makeAstNode<U16TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> U16TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<U16TypeNameNode> duplicated_node(make_ast_node<U16TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API U16TypeNameNode::U16TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::U16, selfAllocator, document) {
+INTERBUFC_API U16TypeNameNode::U16TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::U16, self_allocator, document) {
 }
 
-INTERBUFC_API U16TypeNameNode::U16TypeNameNode(const U16TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API U16TypeNameNode::U16TypeNameNode(const U16TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API U16TypeNameNode::~U16TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> U32TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<U32TypeNameNode> duplicatedNode(makeAstNode<U32TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> U32TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<U32TypeNameNode> duplicated_node(make_ast_node<U32TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API U32TypeNameNode::U32TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::U32, selfAllocator, document) {
+INTERBUFC_API U32TypeNameNode::U32TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::U32, self_allocator, document) {
 }
 
-INTERBUFC_API U32TypeNameNode::U32TypeNameNode(const U32TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API U32TypeNameNode::U32TypeNameNode(const U32TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API U32TypeNameNode::~U32TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> U64TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<U64TypeNameNode> duplicatedNode(makeAstNode<U64TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> U64TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<U64TypeNameNode> duplicated_node(make_ast_node<U64TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API U64TypeNameNode::U64TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::U64, selfAllocator, document) {
+INTERBUFC_API U64TypeNameNode::U64TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::U64, self_allocator, document) {
 }
 
-INTERBUFC_API U64TypeNameNode::U64TypeNameNode(const U64TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API U64TypeNameNode::U64TypeNameNode(const U64TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API U64TypeNameNode::~U64TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> F32TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<F32TypeNameNode> duplicatedNode(makeAstNode<F32TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> F32TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<F32TypeNameNode> duplicated_node(make_ast_node<F32TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API F32TypeNameNode::F32TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::F32, selfAllocator, document) {
+INTERBUFC_API F32TypeNameNode::F32TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::F32, self_allocator, document) {
 }
 
-INTERBUFC_API F32TypeNameNode::F32TypeNameNode(const F32TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API F32TypeNameNode::F32TypeNameNode(const F32TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API F32TypeNameNode::~F32TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> F64TypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<F64TypeNameNode> duplicatedNode(makeAstNode<F64TypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> F64TypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<F64TypeNameNode> duplicated_node(make_ast_node<F64TypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API F64TypeNameNode::F64TypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::F64, selfAllocator, document) {
+INTERBUFC_API F64TypeNameNode::F64TypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::F64, self_allocator, document) {
 }
 
-INTERBUFC_API F64TypeNameNode::F64TypeNameNode(const F64TypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API F64TypeNameNode::F64TypeNameNode(const F64TypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API F64TypeNameNode::~F64TypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> StringTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<StringTypeNameNode> duplicatedNode(makeAstNode<StringTypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> StringTypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<StringTypeNameNode> duplicated_node(make_ast_node<StringTypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API StringTypeNameNode::StringTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::String, selfAllocator, document) {
+INTERBUFC_API StringTypeNameNode::StringTypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::String, self_allocator, document) {
 }
 
-INTERBUFC_API StringTypeNameNode::StringTypeNameNode(const StringTypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API StringTypeNameNode::StringTypeNameNode(const StringTypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API StringTypeNameNode::~StringTypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> BoolTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<BoolTypeNameNode> duplicatedNode(makeAstNode<BoolTypeNameNode>(newAllocator, *this, newAllocator));
-	if(!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> BoolTypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<BoolTypeNameNode> duplicated_node(make_ast_node<BoolTypeNameNode>(new_allocator, *this, new_allocator));
+	if(!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API BoolTypeNameNode::BoolTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Bool, selfAllocator, document) {
+INTERBUFC_API BoolTypeNameNode::BoolTypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Bool, self_allocator, document) {
 }
 
-INTERBUFC_API BoolTypeNameNode::BoolTypeNameNode(const BoolTypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API BoolTypeNameNode::BoolTypeNameNode(const BoolTypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API BoolTypeNameNode::~BoolTypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> ObjectTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
-	AstNodePtr<ObjectTypeNameNode> duplicatedNode(makeAstNode<ObjectTypeNameNode>(newAllocator, *this, newAllocator));
-	if (!duplicatedNode) {
+INTERBUFC_API AstNodePtr<AstNode> ObjectTypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
+	AstNodePtr<ObjectTypeNameNode> duplicated_node(make_ast_node<ObjectTypeNameNode>(new_allocator, *this, new_allocator));
+	if (!duplicated_node) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API ObjectTypeNameNode::ObjectTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Object, selfAllocator, document) {
+INTERBUFC_API ObjectTypeNameNode::ObjectTypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Object, self_allocator, document) {
 }
 
-INTERBUFC_API ObjectTypeNameNode::ObjectTypeNameNode(const ObjectTypeNameNode &rhs, peff::Alloc *selfAllocator) : TypeNameNode(rhs, selfAllocator) {
+INTERBUFC_API ObjectTypeNameNode::ObjectTypeNameNode(const ObjectTypeNameNode &rhs, peff::Alloc *self_allocator) : TypeNameNode(rhs, self_allocator) {
 }
 
 INTERBUFC_API ObjectTypeNameNode::~ObjectTypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> CustomTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
+INTERBUFC_API AstNodePtr<AstNode> CustomTypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
 	bool succeeded = false;
-	AstNodePtr<CustomTypeNameNode> duplicatedNode(makeAstNode<CustomTypeNameNode>(newAllocator, *this, newAllocator, succeeded));
-	if((!duplicatedNode) || (!succeeded)) {
+	AstNodePtr<CustomTypeNameNode> duplicated_node(make_ast_node<CustomTypeNameNode>(new_allocator, *this, new_allocator, succeeded));
+	if((!duplicated_node) || (!succeeded)) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API CustomTypeNameNode::CustomTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Custom, selfAllocator, document) {
+INTERBUFC_API CustomTypeNameNode::CustomTypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document) : TypeNameNode(TypeNameKind::Custom, self_allocator, document) {
 }
 
-INTERBUFC_API CustomTypeNameNode::CustomTypeNameNode(const CustomTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut) : TypeNameNode(rhs, allocator) {
-	if(!(idRefPtr = duplicateIdRef(allocator, rhs.idRefPtr.get()))) {
-		succeededOut = false;
+INTERBUFC_API CustomTypeNameNode::CustomTypeNameNode(const CustomTypeNameNode &rhs, peff::Alloc *allocator, bool &succeeded_out) : TypeNameNode(rhs, allocator) {
+	if(!(id_ref_ptr = duplicate_id_ref(allocator, rhs.id_ref_ptr.get()))) {
+		succeeded_out = false;
 		return;
 	}
 
-	contextNode = rhs.contextNode;
+	context_node = rhs.context_node;
 
-	succeededOut = true;
+	succeeded_out = true;
 }
 
 INTERBUFC_API CustomTypeNameNode::~CustomTypeNameNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> ArrayTypeNameNode::doDuplicate(peff::Alloc *newAllocator) const {
+INTERBUFC_API AstNodePtr<AstNode> ArrayTypeNameNode::do_duplicate(peff::Alloc *new_allocator) const {
 	bool succeeded = false;
-	AstNodePtr<ArrayTypeNameNode> duplicatedNode(makeAstNode<ArrayTypeNameNode>(newAllocator, *this, newAllocator, succeeded));
-	if((!duplicatedNode) || (!succeeded)) {
+	AstNodePtr<ArrayTypeNameNode> duplicated_node(make_ast_node<ArrayTypeNameNode>(new_allocator, *this, new_allocator, succeeded));
+	if((!duplicated_node) || (!succeeded)) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
-INTERBUFC_API ArrayTypeNameNode::ArrayTypeNameNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document, const AstNodePtr<TypeNameNode> &elementType) : TypeNameNode(TypeNameKind::Array, selfAllocator, document), elementType(elementType) {
+INTERBUFC_API ArrayTypeNameNode::ArrayTypeNameNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document, const AstNodePtr<TypeNameNode> &element_type) : TypeNameNode(TypeNameKind::Array, self_allocator, document), element_type(element_type) {
 }
 
-INTERBUFC_API ArrayTypeNameNode::ArrayTypeNameNode(const ArrayTypeNameNode &rhs, peff::Alloc *allocator, bool &succeededOut) : TypeNameNode(rhs, allocator) {
-	if(!(elementType = rhs.elementType->duplicate<TypeNameNode>(allocator))) {
-		succeededOut = false;
+INTERBUFC_API ArrayTypeNameNode::ArrayTypeNameNode(const ArrayTypeNameNode &rhs, peff::Alloc *allocator, bool &succeeded_out) : TypeNameNode(rhs, allocator) {
+	if(!(element_type = rhs.element_type->duplicate<TypeNameNode>(allocator))) {
+		succeeded_out = false;
 		return;
 	}
 
-	succeededOut = true;
+	succeeded_out = true;
 }
 
 INTERBUFC_API ArrayTypeNameNode::~ArrayTypeNameNode() {

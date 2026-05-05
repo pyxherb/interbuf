@@ -9,7 +9,7 @@ INTERBUFC_API IntTokenExtension::IntTokenExtension(peff::Alloc *allocator, int d
 INTERBUFC_API IntTokenExtension::~IntTokenExtension() {
 }
 INTERBUFC_API void IntTokenExtension::dealloc() {
-	peff::destroyAndRelease<IntTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
+	peff::destroy_and_release<IntTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
 }
 
 INTERBUFC_API UIntTokenExtension::UIntTokenExtension(peff::Alloc *allocator, unsigned int data) : allocator(allocator), data(data) {
@@ -17,7 +17,7 @@ INTERBUFC_API UIntTokenExtension::UIntTokenExtension(peff::Alloc *allocator, uns
 INTERBUFC_API UIntTokenExtension::~UIntTokenExtension() {
 }
 INTERBUFC_API void UIntTokenExtension::dealloc() {
-	peff::destroyAndRelease<UIntTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
+	peff::destroy_and_release<UIntTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
 }
 
 INTERBUFC_API LongTokenExtension::LongTokenExtension(peff::Alloc *allocator, long long data) : allocator(allocator), data(data) {
@@ -25,7 +25,7 @@ INTERBUFC_API LongTokenExtension::LongTokenExtension(peff::Alloc *allocator, lon
 INTERBUFC_API LongTokenExtension::~LongTokenExtension() {
 }
 INTERBUFC_API void LongTokenExtension::dealloc() {
-	peff::destroyAndRelease<LongTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
+	peff::destroy_and_release<LongTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
 }
 
 INTERBUFC_API ULongTokenExtension::ULongTokenExtension(peff::Alloc *allocator, unsigned long long data) : allocator(allocator), data(data) {
@@ -33,7 +33,7 @@ INTERBUFC_API ULongTokenExtension::ULongTokenExtension(peff::Alloc *allocator, u
 INTERBUFC_API ULongTokenExtension::~ULongTokenExtension() {
 }
 INTERBUFC_API void ULongTokenExtension::dealloc() {
-	peff::destroyAndRelease<ULongTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
+	peff::destroy_and_release<ULongTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
 }
 
 INTERBUFC_API F32TokenExtension::F32TokenExtension(peff::Alloc *allocator, float data) : allocator(allocator), data(data) {
@@ -41,7 +41,7 @@ INTERBUFC_API F32TokenExtension::F32TokenExtension(peff::Alloc *allocator, float
 INTERBUFC_API F32TokenExtension::~F32TokenExtension() {
 }
 INTERBUFC_API void F32TokenExtension::dealloc() {
-	peff::destroyAndRelease<F32TokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
+	peff::destroy_and_release<F32TokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
 }
 
 INTERBUFC_API F64TokenExtension::F64TokenExtension(peff::Alloc *allocator, double data) : allocator(allocator), data(data) {
@@ -49,7 +49,7 @@ INTERBUFC_API F64TokenExtension::F64TokenExtension(peff::Alloc *allocator, doubl
 INTERBUFC_API F64TokenExtension::~F64TokenExtension() {
 }
 INTERBUFC_API void F64TokenExtension::dealloc() {
-	peff::destroyAndRelease<F64TokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
+	peff::destroy_and_release<F64TokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
 }
 
 INTERBUFC_API StringTokenExtension::StringTokenExtension(peff::Alloc *allocator, peff::String &&data) : allocator(allocator), data(std::move(data)) {
@@ -57,7 +57,7 @@ INTERBUFC_API StringTokenExtension::StringTokenExtension(peff::Alloc *allocator,
 INTERBUFC_API StringTokenExtension::~StringTokenExtension() {
 }
 INTERBUFC_API void StringTokenExtension::dealloc() {
-	peff::destroyAndRelease<StringTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
+	peff::destroy_and_release<StringTokenExtension>(allocator.get(), this, sizeof(std::max_align_t));
 }
 
 INTERBUFC_API Token::Token(peff::Alloc *allocator, const peff::WeakPtr<Document> &document) : allocator(allocator), document(document) {
@@ -65,11 +65,11 @@ INTERBUFC_API Token::Token(peff::Alloc *allocator, const peff::WeakPtr<Document>
 INTERBUFC_API Token::~Token() {
 }
 INTERBUFC_API void Token::dealloc() {
-	peff::destroyAndRelease<Token>(allocator.get(), this, sizeof(std::max_align_t));
+	peff::destroy_and_release<Token>(allocator.get(), this, sizeof(std::max_align_t));
 }
 
-INTERBUFC_API const char *interbufc::getTokenName(TokenId tokenId) {
-	switch (tokenId) {
+INTERBUFC_API const char *interbufc::get_token_name(TokenId token_id) {
+	switch (token_id) {
 		case TokenId::End:
 			return "end of file";
 		case TokenId::Comma:
@@ -234,5 +234,5 @@ INTERBUFC_API const char *interbufc::getTokenName(TokenId tokenId) {
 			return "identifier";
 	}
 
-	return "<unknown tokenId>";
+	return "<unknown token_id>";
 }

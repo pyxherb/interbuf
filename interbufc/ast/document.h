@@ -31,33 +31,33 @@ namespace interbufc {
 	};
 
 	struct CompilationError {
-		TokenRange tokenRange;
-		CompilationErrorKind errorKind;
-		std::variant<std::monostate, ErrorOpeningFileError> exData;
+		TokenRange token_range;
+		CompilationErrorKind error_kind;
+		std::variant<std::monostate, ErrorOpeningFileError> ex_data;
 
 		INTERBUFC_FORCEINLINE CompilationError(
-			const TokenRange &tokenRange,
-			CompilationErrorKind errorKind)
-			: tokenRange(tokenRange),
-			  errorKind(errorKind) {
-			assert(tokenRange);
+			const TokenRange &token_range,
+			CompilationErrorKind error_kind)
+			: token_range(token_range),
+			  error_kind(error_kind) {
+			assert(token_range);
 		}
 
 		INTERBUFC_FORCEINLINE CompilationError(
-			const TokenRange &tokenRange,
+			const TokenRange &token_range,
 			ErrorOpeningFileError &&error)
-			: tokenRange(tokenRange),
-			  errorKind(CompilationErrorKind::ErrorOpeningFile),
-			  exData(std::move(error)) {
-			assert(tokenRange);
+			: token_range(token_range),
+			  error_kind(CompilationErrorKind::ErrorOpeningFile),
+			  ex_data(std::move(error)) {
+			assert(token_range);
 		}
 
 		INTERBUFC_FORCEINLINE bool operator<(const CompilationError &rhs) const noexcept {
-			return tokenRange < rhs.tokenRange;
+			return token_range < rhs.token_range;
 		}
 
 		INTERBUFC_FORCEINLINE bool operator>(const CompilationError &rhs) const noexcept {
-			return tokenRange > rhs.tokenRange;
+			return token_range > rhs.token_range;
 		}
 	};
 
@@ -70,24 +70,24 @@ namespace interbufc {
 		UnusedExprResult = 0,
 	};
 
-	INTERBUFC_FORCEINLINE CompilationError genOutOfMemoryCompError() {
+	INTERBUFC_FORCEINLINE CompilationError gen_out_of_memory_comp_error() {
 		return CompilationError(TokenRange{ 0, 0 }, CompilationErrorKind::OutOfMemory);
 	}
 
-	INTERBUFC_FORCEINLINE CompilationError genIOCompError() {
+	INTERBUFC_FORCEINLINE CompilationError gen_io_comp_error() {
 		return CompilationError(TokenRange{ 0, 0 }, CompilationErrorKind::IO);
 	}
 
 	struct CompilationWarning {
-		TokenRange tokenRange;
-		CompilationWarningKind warningKind;
-		std::variant<std::monostate> exData;
+		TokenRange token_range;
+		CompilationWarningKind warning_kind;
+		std::variant<std::monostate> ex_data;
 
 		INTERBUFC_FORCEINLINE CompilationWarning(
-			const TokenRange &tokenRange,
-			CompilationWarningKind warningKind)
-			: tokenRange(tokenRange),
-			  warningKind(warningKind) {
+			const TokenRange &token_range,
+			CompilationWarningKind warning_kind)
+			: token_range(token_range),
+			  warning_kind(warning_kind) {
 		}
 	};
 
@@ -97,21 +97,21 @@ namespace interbufc {
 
 	class Document : public peff::SharedFromThis<Document> {
 	private:
-		INTERBUFC_API void _doClearDeferredDestructibleAstNodes();
+		INTERBUFC_API void _do_clear_deferred_destructible_ast_nodes();
 
 	public:
 		peff::RcObjectPtr<peff::Alloc> allocator;
-		AstNodePtr<ModuleNode> rootModule;
-		peff::DynArray<AstNodePtr<ExternalModuleProvider>> externalModuleProviders;
+		AstNodePtr<ModuleNode> root_module;
+		peff::DynArray<AstNodePtr<ExternalModuleProvider>> external_module_providers;
 
-		AstNode *destructibleAstNodeList = nullptr;
+		AstNode *destructible_ast_node_list = nullptr;
 
 		INTERBUFC_API Document(peff::Alloc *allocator);
 		INTERBUFC_API virtual ~Document();
 
-		INTERBUFC_FORCEINLINE void clearDeferredDestructibleAstNodes() {
-			if (destructibleAstNodeList) {
-				_doClearDeferredDestructibleAstNodes();
+		INTERBUFC_FORCEINLINE void clear_deferred_destructible_ast_nodes() {
+			if (destructible_ast_node_list) {
+				_do_clear_deferred_destructible_ast_nodes();
 			}
 		}
 	};

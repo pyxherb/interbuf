@@ -46,7 +46,7 @@ namespace interbufc {
 	};
 
 	struct SourceLocation {
-		SourcePosition beginPosition, endPosition;
+		SourcePosition begin_position, end_position;
 	};
 
 	class Lexer;
@@ -156,8 +156,8 @@ namespace interbufc {
 		MaxToken
 	};
 
-	INTERBUFC_FORCEINLINE bool isValidToken(TokenId tokenId) {
-		return (((int)tokenId) >= 0) && (((int)tokenId) < (int)TokenId::MaxToken);
+	INTERBUFC_FORCEINLINE bool is_valid_token(TokenId token_id) {
+		return (((int)token_id) >= 0) && (((int)token_id) < (int)TokenId::MaxToken);
 	}
 
 	class TokenExtension {
@@ -251,12 +251,12 @@ namespace interbufc {
 
 	class Token {
 	public:
-		TokenId tokenId;
+		TokenId token_id;
 		peff::RcObjectPtr<peff::Alloc> allocator;
-		std::string_view sourceText;
+		std::string_view source_text;
 		peff::WeakPtr<Document> document;
-		SourceLocation sourceLocation;
-		std::unique_ptr<TokenExtension, peff::DeallocableDeleter<TokenExtension>> exData;
+		SourceLocation source_location;
+		std::unique_ptr<TokenExtension, peff::DeallocableDeleter<TokenExtension>> ex_data;
 		size_t index = SIZE_MAX;
 
 		INTERBUFC_API Token(peff::Alloc *allocator, const peff::WeakPtr<Document> &document);
@@ -282,15 +282,15 @@ namespace interbufc {
 
 	class Lexer {
 	public:
-		TokenList tokenList;
-		std::optional<LexicalError> lexicalError;
+		TokenList token_list;
+		std::optional<LexicalError> lexical_error;
 
-		INTERBUFC_FORCEINLINE Lexer(peff::Alloc *allocator) : tokenList(allocator) {
+		INTERBUFC_FORCEINLINE Lexer(peff::Alloc *allocator) : token_list(allocator) {
 		}
 		[[nodiscard]] INTERBUFC_API std::optional<LexicalError> lex(const std::string_view &src, peff::Alloc *allocator, const peff::SharedPtr<Document> &document);
 	};
 
-	INTERBUFC_API const char *getTokenName(TokenId tokenId);
+	INTERBUFC_API const char *get_token_name(TokenId token_id);
 }
 
 #endif

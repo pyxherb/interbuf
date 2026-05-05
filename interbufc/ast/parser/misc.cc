@@ -2,104 +2,104 @@
 
 using namespace interbufc;
 
-INTERBUFC_API std::optional<SyntaxError> Parser::lookaheadUntil(size_t nTokenIds, const TokenId tokenIds[]) {
+INTERBUFC_API std::optional<SyntaxError> Parser::lookahead_until(size_t n_token_ids, const TokenId token_ids[]) {
 	// stub.
 	return {};
 
 	Token *token;
-	while ((token->tokenId != TokenId::End)) {
-		for(size_t i = 0 ; i < nTokenIds; ++i) {
-			if(token->tokenId == tokenIds[i]) {
+	while ((token->token_id != TokenId::End)) {
+		for(size_t i = 0 ; i < n_token_ids; ++i) {
+			if(token->token_id == token_ids[i]) {
 				return {};
 			}
 		}
-		token = nextToken(true, true, true);
+		token = next_token(true, true, true);
 	}
 
-	NoMatchingTokensFoundErrorExData exData(resourceAllocator.get());
+	NoMatchingTokensFoundErrorExData ex_data(resource_allocator.get());
 
-	for(size_t i = 0 ; i < nTokenIds; ++i) {
-		TokenId copiedTokenId = tokenIds[i];
-		if(!exData.expectingTokenIds.insert(std::move(copiedTokenId)))
-			return genOutOfMemoryError();
+	for(size_t i = 0 ; i < n_token_ids; ++i) {
+		TokenId copied_token_id = token_ids[i];
+		if(!ex_data.expecting_token_ids.insert(std::move(copied_token_id)))
+			return gen_out_of_memory_error();
 	}
 
-	return SyntaxError(token->index, std::move(exData));
+	return SyntaxError(token->index, std::move(ex_data));
 }
 
-INTERBUFC_API Token *Parser::nextToken(bool keepNewLine, bool keepWhitespace, bool keepComment) {
-	size_t &i = parseContext.idxCurrentToken;
+INTERBUFC_API Token *Parser::next_token(bool keep_new_line, bool keep_whitespace, bool keep_comment) {
+	size_t &i = parse_context.idx_current_token;
 
-	while (i < tokenList.size()) {
-		Token *currentToken = tokenList.at(i).get();
-		currentToken->index = i;
+	while (i < token_list.size()) {
+		Token *current_token = token_list.at(i).get();
+		current_token->index = i;
 
-		switch (tokenList.at(i)->tokenId) {
+		switch (token_list.at(i)->token_id) {
 			case TokenId::NewLine:
-				if (keepNewLine) {
-					parseContext.idxPrevToken = parseContext.idxCurrentToken;
+				if (keep_new_line) {
+					parse_context.idx_prev_token = parse_context.idx_current_token;
 					++i;
-					return currentToken;
+					return current_token;
 				}
 				break;
 			case TokenId::Whitespace:
-				if (keepWhitespace) {
-					parseContext.idxPrevToken = parseContext.idxCurrentToken;
+				if (keep_whitespace) {
+					parse_context.idx_prev_token = parse_context.idx_current_token;
 					++i;
-					return currentToken;
+					return current_token;
 				}
 				break;
 			case TokenId::LineComment:
 			case TokenId::BlockComment:
 			case TokenId::DocumentationComment:
-				if (keepComment) {
-					parseContext.idxPrevToken = parseContext.idxCurrentToken;
+				if (keep_comment) {
+					parse_context.idx_prev_token = parse_context.idx_current_token;
 					++i;
-					return currentToken;
+					return current_token;
 				}
 				break;
 			default:
-				assert(isValidToken(currentToken->tokenId));
-				parseContext.idxPrevToken = parseContext.idxCurrentToken;
+				assert(is_valid_token(current_token->token_id));
+				parse_context.idx_prev_token = parse_context.idx_current_token;
 				++i;
-				return currentToken;
+				return current_token;
 		}
 
 		++i;
 	}
 
-	return tokenList.back().get();
+	return token_list.back().get();
 }
 
-INTERBUFC_API Token *Parser::peekToken(bool keepNewLine, bool keepWhitespace, bool keepComment) {
-	size_t i = parseContext.idxCurrentToken;
+INTERBUFC_API Token *Parser::peek_token(bool keep_new_line, bool keep_whitespace, bool keep_comment) {
+	size_t i = parse_context.idx_current_token;
 
-	while (i < tokenList.size()) {
-		Token *currentToken = tokenList.at(i).get();
-		currentToken->index = i;
+	while (i < token_list.size()) {
+		Token *current_token = token_list.at(i).get();
+		current_token->index = i;
 
-		switch (currentToken->tokenId) {
+		switch (current_token->token_id) {
 			case TokenId::NewLine:
-				if (keepNewLine)
-					return currentToken;
+				if (keep_new_line)
+					return current_token;
 				break;
 			case TokenId::Whitespace:
-				if (keepWhitespace)
-					return currentToken;
+				if (keep_whitespace)
+					return current_token;
 				break;
 			case TokenId::LineComment:
 			case TokenId::BlockComment:
 			case TokenId::DocumentationComment:
-				if (keepComment)
-					return currentToken;
+				if (keep_comment)
+					return current_token;
 				break;
 			default:
-				assert(isValidToken(currentToken->tokenId));
-				return currentToken;
+				assert(is_valid_token(current_token->token_id));
+				return current_token;
 		}
 
 		++i;
 	}
 
-	return tokenList.back().get();
+	return token_list.back().get();
 }

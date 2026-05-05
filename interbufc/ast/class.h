@@ -7,21 +7,21 @@
 namespace interbufc {
 	class ClassNode : public ModuleNode {
 	public:
-		INTERBUFC_API ClassNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
+		INTERBUFC_API ClassNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document);
 		INTERBUFC_API virtual ~ClassNode();
 	};
 
 	class StructNode : public ModuleNode {
 	public:
-		INTERBUFC_API StructNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
+		INTERBUFC_API StructNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document);
 		INTERBUFC_API virtual ~StructNode();
 	};
 
 	class EnumNode : public ModuleNode {
 	public:
-		AstNodePtr<TypeNameNode> baseType;
+		AstNodePtr<TypeNameNode> base_type;
 
-		INTERBUFC_API EnumNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
+		INTERBUFC_API EnumNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document);
 		INTERBUFC_API virtual ~EnumNode();
 	};
 
@@ -29,7 +29,7 @@ namespace interbufc {
 	public:
 		AstNodePtr<ExprNode> value;
 
-		INTERBUFC_API EnumItemNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
+		INTERBUFC_API EnumItemNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document);
 		INTERBUFC_API virtual ~EnumItemNode();
 	};
 }

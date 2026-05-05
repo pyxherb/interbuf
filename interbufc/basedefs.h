@@ -19,18 +19,18 @@
 #define INTERBUFC_FORCEINLINE PEFF_FORCEINLINE
 
 #if defined(_MSC_VER)
-	#define INTERBUFC_DECL_EXPLICIT_INSTANTIATED_CLASS(apiModifier, name, ...) \
-		apiModifier extern template class name<__VA_ARGS__>;
-	#define INTERBUFC_DEF_EXPLICIT_INSTANTIATED_CLASS(apiModifier, name, ...) \
-		apiModifier template class name<__VA_ARGS__>;
+	#define INTERBUFC_DECL_EXPLICIT_INSTANTIATED_CLASS(api_modifier, name, ...) \
+		api_modifier extern template class name<__VA_ARGS__>;
+	#define INTERBUFC_DEF_EXPLICIT_INSTANTIATED_CLASS(api_modifier, name, ...) \
+		api_modifier template class name<__VA_ARGS__>;
 #elif defined(__GNUC__) || defined(__clang__)
-	#define INTERBUFC_DECL_EXPLICIT_INSTANTIATED_CLASS(apiModifier, name, ...) \
-		extern template class apiModifier name<__VA_ARGS__>;
-	#define INTERBUFC_DEF_EXPLICIT_INSTANTIATED_CLASS(apiModifier, name, ...) \
+	#define INTERBUFC_DECL_EXPLICIT_INSTANTIATED_CLASS(api_modifier, name, ...) \
+		extern template class api_modifier name<__VA_ARGS__>;
+	#define INTERBUFC_DEF_EXPLICIT_INSTANTIATED_CLASS(api_modifier, name, ...) \
 		template class name<__VA_ARGS__>;
 #else
-	#define INTERBUFC_DECL_EXPLICIT_INSTANTIATED_CLASS(apiModifier, name, ...)
-	#define INTERBUFC_DEF_EXPLICIT_INSTANTIATED_CLASS(apiModifier, name, ...)
+	#define INTERBUFC_DECL_EXPLICIT_INSTANTIATED_CLASS(api_modifier, name, ...)
+	#define INTERBUFC_DEF_EXPLICIT_INSTANTIATED_CLASS(api_modifier, name, ...)
 #endif
 
 #if IS_INTERBUFC_BUILDING

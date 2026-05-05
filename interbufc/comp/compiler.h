@@ -5,7 +5,7 @@
 #include <interbufc/ast/typename.h>
 
 namespace interbufc {
-	extern std::string_view g_language, g_sourceFileName, g_outputDirectoryPath, g_outputFileName;
+	extern std::string_view g_language, g_source_file_name, g_output_directory_path, g_output_file_name;
 
 	class Compiler {
 	public:
@@ -16,16 +16,16 @@ namespace interbufc {
 		INTERBUFC_API Compiler(peff::Alloc *allocator);
 		INTERBUFC_API virtual ~Compiler();
 
-		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<CompilationError> pushError(CompilationError &&error) noexcept {
-			if (!errors.pushBack(std::move(error)))
-				return genOutOfMemoryCompError();
+		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<CompilationError> push_error(CompilationError &&error) noexcept {
+			if (!errors.push_back(std::move(error)))
+				return gen_out_of_memory_comp_error();
 
 			return {};
 		}
 
-		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<CompilationError> pushWarning(CompilationWarning &&warning) noexcept {
-			if (!warnings.pushBack(std::move(warning)))
-				return genOutOfMemoryCompError();
+		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<CompilationError> push_warning(CompilationWarning &&warning) noexcept {
+			if (!warnings.push_back(std::move(warning)))
+				return gen_out_of_memory_comp_error();
 
 			return {};
 		}
@@ -34,15 +34,15 @@ namespace interbufc {
 			AstNodePtr<ModuleNode> mod) = 0;
 	};
 
-	std::optional<interbufc::CompilationError> fillEnum(Compiler &compiler, AstNodePtr<EnumNode> enumNode);
-	std::optional<interbufc::CompilationError> defaultEnumValue(Compiler &compiler, peff::Alloc *allocator, AstNodePtr<TypeNameNode> expr, AstNodePtr<ExprNode> &exprOut);
-	std::optional<interbufc::CompilationError> incEnumValue(Compiler &compiler, peff::Alloc *allocator, AstNodePtr<ExprNode> expr, AstNodePtr<ExprNode> &exprOut);
-	std::optional<CompilationError> resolveCustomTypeName(AstNodePtr<CustomTypeNameNode> typeName, AstNodePtr<MemberNode> &memberOut);
+	std::optional<interbufc::CompilationError> fill_enum(Compiler &compiler, AstNodePtr<EnumNode> enum_node);
+	std::optional<interbufc::CompilationError> default_enum_value(Compiler &compiler, peff::Alloc *allocator, AstNodePtr<TypeNameNode> expr, AstNodePtr<ExprNode> &expr_out);
+	std::optional<interbufc::CompilationError> inc_enum_value(Compiler &compiler, peff::Alloc *allocator, AstNodePtr<ExprNode> expr, AstNodePtr<ExprNode> &expr_out);
+	std::optional<CompilationError> resolve_custom_type_name(AstNodePtr<CustomTypeNameNode> type_name, AstNodePtr<MemberNode> &member_out);
 }
 
 #define INTERBUFC_RETURN_EXCEPT_IF_WRITE_FAILED(allocator, e)         \
 	if (!(e))                                                        \
-		return interbufc::genIOCompError(); \
+		return interbufc::gen_io_comp_error(); \
 	else                                                             \
 		;
 

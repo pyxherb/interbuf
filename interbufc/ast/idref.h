@@ -7,23 +7,23 @@
 namespace interbufc {
 	struct IdRefEntry {
 		peff::String name;
-		size_t accessOpTokenIndex = SIZE_MAX, nameTokenIndex = SIZE_MAX, leftAngleBracketTokenIndex = SIZE_MAX, rightAngleBracketTokenIndex = SIZE_MAX;
-		peff::DynArray<size_t> commaTokenIndices;
+		size_t access_op_token_index = SIZE_MAX, name_token_index = SIZE_MAX, left_angle_bracket_token_index = SIZE_MAX, right_angle_bracket_token_index = SIZE_MAX;
+		peff::DynArray<size_t> comma_token_indices;
 
-		INTERBUFC_FORCEINLINE IdRefEntry(peff::Alloc *selfAllocator) : name(selfAllocator), commaTokenIndices(selfAllocator) {}
-		INTERBUFC_FORCEINLINE IdRefEntry(IdRefEntry &&rhs) noexcept : name(std::move(rhs.name)), accessOpTokenIndex(rhs.accessOpTokenIndex), nameTokenIndex(rhs.nameTokenIndex), leftAngleBracketTokenIndex(rhs.leftAngleBracketTokenIndex), rightAngleBracketTokenIndex(rhs.rightAngleBracketTokenIndex), commaTokenIndices(std::move(rhs.commaTokenIndices)) {
+		INTERBUFC_FORCEINLINE IdRefEntry(peff::Alloc *self_allocator) : name(self_allocator), comma_token_indices(self_allocator) {}
+		INTERBUFC_FORCEINLINE IdRefEntry(IdRefEntry &&rhs) noexcept : name(std::move(rhs.name)), access_op_token_index(rhs.access_op_token_index), name_token_index(rhs.name_token_index), left_angle_bracket_token_index(rhs.left_angle_bracket_token_index), right_angle_bracket_token_index(rhs.right_angle_bracket_token_index), comma_token_indices(std::move(rhs.comma_token_indices)) {
 		}
 	};
 
-	INTERBUFC_API std::optional<IdRefEntry> duplicateIdRefEntry(peff::Alloc *selfAllocator, const IdRefEntry &rhs);
+	INTERBUFC_API std::optional<IdRefEntry> duplicate_id_ref_entry(peff::Alloc *self_allocator, const IdRefEntry &rhs);
 
 	class IdRef final {
 	public:
-		peff::RcObjectPtr<peff::Alloc> selfAllocator;
+		peff::RcObjectPtr<peff::Alloc> self_allocator;
 		peff::DynArray<IdRefEntry> entries;
-		TokenRange tokenRange;
+		TokenRange token_range;
 
-		INTERBUFC_API IdRef(peff::Alloc *selfAllocator);
+		INTERBUFC_API IdRef(peff::Alloc *self_allocator);
 		INTERBUFC_API virtual ~IdRef();
 
 		INTERBUFC_API void dealloc() noexcept;
@@ -31,7 +31,7 @@ namespace interbufc {
 
 	using IdRefPtr = std::unique_ptr<IdRef, peff::DeallocableDeleter<IdRef>>;
 
-	INTERBUFC_API IdRefPtr duplicateIdRef(peff::Alloc *selfAllocator, IdRef *rhs);
+	INTERBUFC_API IdRefPtr duplicate_id_ref(peff::Alloc *self_allocator, IdRef *rhs);
 }
 
 #endif

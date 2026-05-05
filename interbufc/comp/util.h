@@ -24,7 +24,7 @@ namespace interbufc {
 			if (!size)
 				return {};
 			if (fread(buffer, size, 1, _fp) < 1)
-				return genIOCompError();
+				return gen_io_comp_error();
 			return {};
 		}
 
@@ -32,7 +32,7 @@ namespace interbufc {
 			if (!size)
 				return {};
 			if (fwrite(buffer, size, 1, _fp) < 1)
-				return genIOCompError();
+				return gen_io_comp_error();
 			return {};
 		}
 
@@ -40,16 +40,16 @@ namespace interbufc {
 			if (!s.size())
 				return {};
 			if (fwrite(s.data(), s.size(), 1, _fp) < 1)
-				return genIOCompError();
+				return gen_io_comp_error();
 			return {};
 		}
 
-		INTERBUFC_FORCEINLINE void setCFile(FILE *fp) {
+		INTERBUFC_FORCEINLINE void set_c_file(FILE *fp) {
 			close();
 			_fp = fp;
 		}
 
-		INTERBUFC_FORCEINLINE FILE* cFile() const {
+		INTERBUFC_FORCEINLINE FILE* c_file() const {
 			return _fp;
 		}
 	};

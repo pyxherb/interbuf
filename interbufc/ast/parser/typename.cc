@@ -3,147 +3,147 @@
 
 using namespace interbufc;
 
-INTERBUFC_API std::optional<SyntaxError> Parser::parseTypeName(AstNodePtr<TypeNameNode> &typeNameOut, bool withCircumfixes) {
-	std::optional<SyntaxError> syntaxError;
-	Token *t = peekToken();
+INTERBUFC_API std::optional<SyntaxError> Parser::parse_type_name(AstNodePtr<TypeNameNode> &type_name_out, bool with_circumfixes) {
+	std::optional<SyntaxError> syntax_error;
+	Token *t = peek_token();
 
-	switch (t->tokenId) {
+	switch (t->token_id) {
 		case TokenId::I8TypeName:
-			if (!(typeNameOut = makeAstNode<I8TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<I8TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::I16TypeName:
-			if (!(typeNameOut = makeAstNode<I16TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<I16TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::I32TypeName:
-			if (!(typeNameOut = makeAstNode<I32TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<I32TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::I64TypeName:
-			if (!(typeNameOut = makeAstNode<I64TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<I64TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::U8TypeName:
-			if (!(typeNameOut = makeAstNode<U8TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<U8TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::U16TypeName:
-			if (!(typeNameOut = makeAstNode<U16TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<U16TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::U32TypeName:
-			if (!(typeNameOut = makeAstNode<U32TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<U32TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::U64TypeName:
-			if (!(typeNameOut = makeAstNode<U64TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<U64TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::F32TypeName:
-			if (!(typeNameOut = makeAstNode<F32TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<F32TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::F64TypeName:
-			if (!(typeNameOut = makeAstNode<F64TypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<F64TypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::ObjectTypeName:
-			if (!(typeNameOut = makeAstNode<ObjectTypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<ObjectTypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::BoolTypeName:
-			if (!(typeNameOut = makeAstNode<BoolTypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<BoolTypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::StringTypeName:
-			if (!(typeNameOut = makeAstNode<StringTypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(), document)
-						.castTo<TypeNameNode>()))
-				return genOutOfMemoryError();
-			typeNameOut->tokenRange = TokenRange{ t->index };
-			nextToken();
+			if (!(type_name_out = make_ast_node<StringTypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(), document)
+						.cast_to<TypeNameNode>()))
+				return gen_out_of_memory_error();
+			type_name_out->token_range = TokenRange{ t->index };
+			next_token();
 			break;
 		case TokenId::Id: {
 			IdRefPtr id;
-			if ((syntaxError = parseIdRef(id)))
-				return syntaxError;
+			if ((syntax_error = parse_id_ref(id)))
+				return syntax_error;
 
 			AstNodePtr<CustomTypeNameNode> tn;
 
-			if (!(tn = makeAstNode<CustomTypeNameNode>(
-					  resourceAllocator.get(),
-					  resourceAllocator.get(),
+			if (!(tn = make_ast_node<CustomTypeNameNode>(
+					  resource_allocator.get(),
+					  resource_allocator.get(),
 					  document)))
-				return genOutOfMemoryError();
+				return gen_out_of_memory_error();
 
-			tn->contextNode = curParent;
+			tn->context_node = cur_parent;
 
-			tn->tokenRange = id->tokenRange;
-			tn->idRefPtr = std::move(id);
+			tn->token_range = id->token_range;
+			tn->id_ref_ptr = std::move(id);
 
-			typeNameOut = tn.castTo<TypeNameNode>();
+			type_name_out = tn.cast_to<TypeNameNode>();
 
 			break;
 		}
@@ -151,25 +151,25 @@ INTERBUFC_API std::optional<SyntaxError> Parser::parseTypeName(AstNodePtr<TypeNa
 			return SyntaxError(TokenRange{ t->index }, SyntaxErrorKind::UnexpectedToken);
 	}
 
-	if (withCircumfixes) {
+	if (with_circumfixes) {
 		while (true) {
-			switch ((t = peekToken())->tokenId) {
+			switch ((t = peek_token())->token_id) {
 				case TokenId::LBracket: {
-					nextToken();
+					next_token();
 
-					Token *rBracketToken;
-					if ((syntaxError = expectToken((rBracketToken = peekToken()), TokenId::RBracket)))
-						return SyntaxError(TokenRange{ rBracketToken->index }, ExpectingSingleTokenErrorExData{ TokenId::RBracket });
+					Token *r_bracket_token;
+					if ((syntax_error = expect_token((r_bracket_token = peek_token()), TokenId::RBracket)))
+						return SyntaxError(TokenRange{ r_bracket_token->index }, ExpectingSingleTokenErrorExData{ TokenId::RBracket });
 
-					nextToken();
+					next_token();
 
-					if (!(typeNameOut = makeAstNode<ArrayTypeNameNode>(
-							  resourceAllocator.get(),
-							  resourceAllocator.get(),
+					if (!(type_name_out = make_ast_node<ArrayTypeNameNode>(
+							  resource_allocator.get(),
+							  resource_allocator.get(),
 							  document,
-							  typeNameOut)
-								.castTo<TypeNameNode>()))
-						return genOutOfMemoryError();
+							  type_name_out)
+								.cast_to<TypeNameNode>()))
+						return gen_out_of_memory_error();
 					break;
 				}
 				default:

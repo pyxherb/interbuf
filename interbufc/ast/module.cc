@@ -6,66 +6,66 @@
 using namespace interbufc;
 
 INTERBUFC_API MemberNode::MemberNode(
-	AstNodeType astNodeType,
-	peff::Alloc *selfAllocator,
+	AstNodeType ast_node_type,
+	peff::Alloc *self_allocator,
 	const AstNodePtr<Document> &document)
-	: AstNode(astNodeType, selfAllocator, document),
-	  name(selfAllocator) {
+	: AstNode(ast_node_type, self_allocator, document),
+	  name(self_allocator) {
 }
 
-INTERBUFC_API MemberNode::MemberNode(const MemberNode &rhs, peff::Alloc *allocator, bool &succeededOut) : AstNode(rhs, allocator), name(allocator) {
+INTERBUFC_API MemberNode::MemberNode(const MemberNode &rhs, peff::Alloc *allocator, bool &succeeded_out) : AstNode(rhs, allocator), name(allocator) {
 	if (!name.build(rhs.name)) {
-		succeededOut = false;
+		succeeded_out = false;
 		return;
 	}
 
-	succeededOut = true;
+	succeeded_out = true;
 }
 
 INTERBUFC_API MemberNode::~MemberNode() {
 }
 
-INTERBUFC_API AstNodePtr<AstNode> ModuleNode::doDuplicate(peff::Alloc *newAllocator) const {
+INTERBUFC_API AstNodePtr<AstNode> ModuleNode::do_duplicate(peff::Alloc *new_allocator) const {
 	bool succeeded = false;
-	AstNodePtr<ModuleNode> duplicatedNode(makeAstNode<ModuleNode>(newAllocator, *this, newAllocator, succeeded));
-	if ((!duplicatedNode) || (!succeeded)) {
+	AstNodePtr<ModuleNode> duplicated_node(make_ast_node<ModuleNode>(new_allocator, *this, new_allocator, succeeded));
+	if ((!duplicated_node) || (!succeeded)) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
 INTERBUFC_API ModuleNode::ModuleNode(
-	peff::Alloc *selfAllocator,
+	peff::Alloc *self_allocator,
 	const AstNodePtr<Document> &document,
-	AstNodeType astNodeType)
-	: MemberNode(astNodeType, selfAllocator, document),
-	  members(selfAllocator),
-	  memberIndices(selfAllocator),
-	  anonymousImports(selfAllocator) {
+	AstNodeType ast_node_type)
+	: MemberNode(ast_node_type, self_allocator, document),
+	  members(self_allocator),
+	  member_indices(self_allocator),
+	  anonymous_imports(self_allocator) {
 }
 
-INTERBUFC_API ModuleNode::ModuleNode(const ModuleNode &rhs, peff::Alloc *allocator, bool &succeededOut) : MemberNode(rhs, allocator, succeededOut), members(allocator), memberIndices(allocator), anonymousImports(allocator) {
-	if (!succeededOut) {
+INTERBUFC_API ModuleNode::ModuleNode(const ModuleNode &rhs, peff::Alloc *allocator, bool &succeeded_out) : MemberNode(rhs, allocator, succeeded_out), members(allocator), member_indices(allocator), anonymous_imports(allocator) {
+	if (!succeeded_out) {
 		return;
 	}
 
 	parser = rhs.parser;
 
-	if (!anonymousImports.resize(rhs.anonymousImports.size())) {
-		succeededOut = false;
+	if (!anonymous_imports.resize(rhs.anonymous_imports.size())) {
+		succeeded_out = false;
 		return;
 	}
 
-	for (size_t i = 0; i < anonymousImports.size(); ++i) {
-		if (!(anonymousImports.at(i) = rhs.anonymousImports.at(i)->duplicate<ImportNode>(allocator))) {
-			succeededOut = false;
+	for (size_t i = 0; i < anonymous_imports.size(); ++i) {
+		if (!(anonymous_imports.at(i) = rhs.anonymous_imports.at(i)->duplicate<ImportNode>(allocator))) {
+			succeeded_out = false;
 			return;
 		}
 	}
 
 	if (!members.resize(rhs.members.size())) {
-		succeededOut = false;
+		succeeded_out = false;
 		return;
 	}
 
@@ -73,67 +73,67 @@ INTERBUFC_API ModuleNode::ModuleNode(const ModuleNode &rhs, peff::Alloc *allocat
 		AstNodePtr<MemberNode> &m = members.at(i);
 		const AstNodePtr<MemberNode> &rm = rhs.members.at(i);
 		if (!(m = rm->duplicate<MemberNode>(allocator))) {
-			succeededOut = false;
+			succeeded_out = false;
 			return;
 		}
 
-		if (!indexMember(i)) {
-			succeededOut = false;
+		if (!index_member(i)) {
+			succeeded_out = false;
 			return;
 		}
 	}
 
-	isVarDefStmtsNormalized = rhs.isVarDefStmtsNormalized;
+	is_var_def_stmts_normalized = rhs.is_var_def_stmts_normalized;
 
-	succeededOut = true;
+	succeeded_out = true;
 }
 
 INTERBUFC_API ModuleNode::~ModuleNode() {
 }
 
-INTERBUFC_API size_t ModuleNode::pushMember(AstNodePtr<MemberNode> memberNode) noexcept {
-	if (!members.pushBack(std::move(memberNode))) {
+INTERBUFC_API size_t ModuleNode::push_member(AstNodePtr<MemberNode> member_node) noexcept {
+	if (!members.push_back(std::move(member_node))) {
 		return SIZE_MAX;
 	}
 
 	return members.size() - 1;
 }
 
-INTERBUFC_API bool ModuleNode::addMember(AstNodePtr<MemberNode> memberNode) noexcept {
+INTERBUFC_API bool ModuleNode::add_member(AstNodePtr<MemberNode> member_node) noexcept {
 	size_t index;
 
-	if ((index = pushMember(memberNode)) == SIZE_MAX) {
+	if ((index = push_member(member_node)) == SIZE_MAX) {
 		return false;
 	}
 
-	return indexMember(index);
+	return index_member(index);
 }
 
-INTERBUFC_API bool ModuleNode::indexMember(size_t indexInMemberArray) noexcept {
-	AstNodePtr<MemberNode> m = members.at(indexInMemberArray);
+INTERBUFC_API bool ModuleNode::index_member(size_t index_in_member_array) noexcept {
+	AstNodePtr<MemberNode> m = members.at(index_in_member_array);
 
-	if (!memberIndices.insert(m->name, +indexInMemberArray)) {
+	if (!member_indices.insert(m->name, +index_in_member_array)) {
 		return false;
 	}
 
-	m->setParent(this);
+	m->set_parent(this);
 
 	return true;
 }
 
-INTERBUFC_API void ModuleNode::removeMember(const std::string_view &name) noexcept {
-	size_t index = memberIndices.at(name);
-	members.eraseRange(index, index + 1);
-	memberIndices.remove(name);
-	for (auto i : memberIndices) {
+INTERBUFC_API void ModuleNode::remove_member(const std::string_view &name) noexcept {
+	size_t index = member_indices.at(name);
+	members.erase_range(index, index + 1);
+	member_indices.remove(name);
+	for (auto i : member_indices) {
 		if (i.second > index) {
 			--i.second;
 		}
 	}
 }
 
-INTERBUFC_API void ModuleNode::setParser(AstNodePtr<Parser> parser) {
+INTERBUFC_API void ModuleNode::set_parser(AstNodePtr<Parser> parser) {
 	parser->document = {};
-	parser->curParent = {};
+	parser->cur_parent = {};
 	this->parser = parser;
 }

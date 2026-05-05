@@ -26,144 +26,144 @@ namespace interbufc {
 	};
 
 	struct ExpectingSingleTokenErrorExData {
-		TokenId expectingTokenId;
+		TokenId expecting_token_id;
 	};
 
 	struct ExpectingTokensErrorExData {
-		peff::Set<TokenId> expectingTokenIds;
+		peff::Set<TokenId> expecting_token_ids;
 
-		INTERBUFC_FORCEINLINE ExpectingTokensErrorExData(peff::Alloc *allocator) : expectingTokenIds(allocator) {
+		INTERBUFC_FORCEINLINE ExpectingTokensErrorExData(peff::Alloc *allocator) : expecting_token_ids(allocator) {
 		}
 	};
 
 	struct NoMatchingTokensFoundErrorExData {
-		peff::Set<TokenId> expectingTokenIds;
+		peff::Set<TokenId> expecting_token_ids;
 
-		INTERBUFC_FORCEINLINE NoMatchingTokensFoundErrorExData(peff::Alloc *allocator) : expectingTokenIds(allocator) {
+		INTERBUFC_FORCEINLINE NoMatchingTokensFoundErrorExData(peff::Alloc *allocator) : expecting_token_ids(allocator) {
 		}
 	};
 
 	struct ConflictingDefinitionsErrorExData {
-		peff::String memberName;
+		peff::String member_name;
 
-		INTERBUFC_FORCEINLINE ConflictingDefinitionsErrorExData(peff::String &&name) : memberName(std::move(name)) {
+		INTERBUFC_FORCEINLINE ConflictingDefinitionsErrorExData(peff::String &&name) : member_name(std::move(name)) {
 		}
 	};
 
 	struct SyntaxError {
-		TokenRange tokenRange;
-		SyntaxErrorKind errorKind;
-		std::variant<std::monostate, ExpectingTokensErrorExData, NoMatchingTokensFoundErrorExData, ExpectingSingleTokenErrorExData, ConflictingDefinitionsErrorExData> exData;
+		TokenRange token_range;
+		SyntaxErrorKind error_kind;
+		std::variant<std::monostate, ExpectingTokensErrorExData, NoMatchingTokensFoundErrorExData, ExpectingSingleTokenErrorExData, ConflictingDefinitionsErrorExData> ex_data;
 
 		INTERBUFC_FORCEINLINE SyntaxError(
-			const TokenRange &tokenRange,
-			SyntaxErrorKind errorKind)
-			: tokenRange(tokenRange),
-			  errorKind(errorKind) {
-		}
-
-		INTERBUFC_FORCEINLINE SyntaxError(
-			const TokenRange &tokenRange,
-			ExpectingTokensErrorExData &&exData)
-			: tokenRange(tokenRange),
-			  errorKind(SyntaxErrorKind::ExpectingTokens),
-			  exData(std::move(exData)) {
+			const TokenRange &token_range,
+			SyntaxErrorKind error_kind)
+			: token_range(token_range),
+			  error_kind(error_kind) {
 		}
 
 		INTERBUFC_FORCEINLINE SyntaxError(
-			const TokenRange &tokenRange,
-			ExpectingSingleTokenErrorExData &&exData)
-			: tokenRange(tokenRange),
-			  errorKind(SyntaxErrorKind::ExpectingSingleToken),
-			  exData(std::move(exData)) {
+			const TokenRange &token_range,
+			ExpectingTokensErrorExData &&ex_data)
+			: token_range(token_range),
+			  error_kind(SyntaxErrorKind::ExpectingTokens),
+			  ex_data(std::move(ex_data)) {
 		}
 
 		INTERBUFC_FORCEINLINE SyntaxError(
-			const TokenRange &tokenRange,
-			NoMatchingTokensFoundErrorExData &&exData)
-			: tokenRange(tokenRange),
-			  errorKind(SyntaxErrorKind::NoMatchingTokensFound),
-			  exData(std::move(exData)) {
+			const TokenRange &token_range,
+			ExpectingSingleTokenErrorExData &&ex_data)
+			: token_range(token_range),
+			  error_kind(SyntaxErrorKind::ExpectingSingleToken),
+			  ex_data(std::move(ex_data)) {
 		}
 
 		INTERBUFC_FORCEINLINE SyntaxError(
-			const TokenRange &tokenRange,
-			ConflictingDefinitionsErrorExData &&exData)
-			: tokenRange(tokenRange),
-			  errorKind(SyntaxErrorKind::ConflictingDefinitions),
-			  exData(std::move(exData)) {
+			const TokenRange &token_range,
+			NoMatchingTokensFoundErrorExData &&ex_data)
+			: token_range(token_range),
+			  error_kind(SyntaxErrorKind::NoMatchingTokensFound),
+			  ex_data(std::move(ex_data)) {
 		}
 
-		INTERBUFC_FORCEINLINE ExpectingTokensErrorExData &getExpectingTokensErrorExData() {
-			return std::get<ExpectingTokensErrorExData>(exData);
+		INTERBUFC_FORCEINLINE SyntaxError(
+			const TokenRange &token_range,
+			ConflictingDefinitionsErrorExData &&ex_data)
+			: token_range(token_range),
+			  error_kind(SyntaxErrorKind::ConflictingDefinitions),
+			  ex_data(std::move(ex_data)) {
 		}
 
-		INTERBUFC_FORCEINLINE const ExpectingTokensErrorExData &getExpectingTokensErrorExData() const {
-			return std::get<ExpectingTokensErrorExData>(exData);
+		INTERBUFC_FORCEINLINE ExpectingTokensErrorExData &get_expecting_tokens_error_ex_data() {
+			return std::get<ExpectingTokensErrorExData>(ex_data);
 		}
 
-		INTERBUFC_FORCEINLINE const NoMatchingTokensFoundErrorExData &getNoMatchingTokensFoundErrorExData() const {
-			return std::get<NoMatchingTokensFoundErrorExData>(exData);
+		INTERBUFC_FORCEINLINE const ExpectingTokensErrorExData &get_expecting_tokens_error_ex_data() const {
+			return std::get<ExpectingTokensErrorExData>(ex_data);
+		}
+
+		INTERBUFC_FORCEINLINE const NoMatchingTokensFoundErrorExData &get_no_matching_tokens_found_error_ex_data() const {
+			return std::get<NoMatchingTokensFoundErrorExData>(ex_data);
 		}
 	};
 
 	class Parser : public peff::SharedFromThis<Parser> {
 	public:
 		AstNodePtr<Document> document;
-		AstNodePtr<MemberNode> curParent;
-		peff::RcObjectPtr<peff::Alloc> resourceAllocator;
-		TokenList tokenList;
+		AstNodePtr<MemberNode> cur_parent;
+		peff::RcObjectPtr<peff::Alloc> resource_allocator;
+		TokenList token_list;
 		struct ParseContext {
-			size_t idxPrevToken = 0, idxCurrentToken = 0;
+			size_t idx_prev_token = 0, idx_current_token = 0;
 		};
-		ParseContext parseContext;
-		peff::DynArray<SyntaxError> syntaxErrors;
+		ParseContext parse_context;
+		peff::DynArray<SyntaxError> syntax_errors;
 
-		INTERBUFC_API Parser(AstNodePtr<Document> document, TokenList &&tokenList, peff::Alloc *resourceAllocator);
+		INTERBUFC_API Parser(AstNodePtr<Document> document, TokenList &&token_list, peff::Alloc *resource_allocator);
 		INTERBUFC_API ~Parser();
 
-		INTERBUFC_API SyntaxError genOutOfMemoryError() {
+		INTERBUFC_API SyntaxError gen_out_of_memory_error() {
 			return SyntaxError(TokenRange{ 0 }, SyntaxErrorKind::OutOfMemory);
 		}
 
-		INTERBUFC_API std::optional<SyntaxError> lookaheadUntil(size_t nTokenIds, const TokenId tokenIds[]);
-		INTERBUFC_API Token *nextToken(bool keepNewLine = false, bool keepWhitespace = false, bool keepComment = false);
-		INTERBUFC_API Token *peekToken(bool keepNewLine = false, bool keepWhitespace = false, bool keepComment = false);
+		INTERBUFC_API std::optional<SyntaxError> lookahead_until(size_t n_token_ids, const TokenId token_ids[]);
+		INTERBUFC_API Token *next_token(bool keep_new_line = false, bool keep_whitespace = false, bool keep_comment = false);
+		INTERBUFC_API Token *peek_token(bool keep_new_line = false, bool keep_whitespace = false, bool keep_comment = false);
 
-		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<SyntaxError> expectToken(Token *token, TokenId tokenId) {
-			if (token->tokenId != tokenId) {
-				ExpectingSingleTokenErrorExData exData = { tokenId };
+		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<SyntaxError> expect_token(Token *token, TokenId token_id) {
+			if (token->token_id != token_id) {
+				ExpectingSingleTokenErrorExData ex_data = { token_id };
 
-				return SyntaxError(TokenRange{ token->index }, std::move(exData));
+				return SyntaxError(TokenRange{ token->index }, std::move(ex_data));
 			}
 
 			return {};
 		}
 
-		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<SyntaxError> expectToken(Token *token) {
-			if (token->tokenId == TokenId::End) {
-				ExpectingTokensErrorExData exData(resourceAllocator.get());
+		[[nodiscard]] INTERBUFC_FORCEINLINE std::optional<SyntaxError> expect_token(Token *token) {
+			if (token->token_id == TokenId::End) {
+				ExpectingTokensErrorExData ex_data(resource_allocator.get());
 
-				return SyntaxError(TokenRange{ token->index }, std::move(exData));
+				return SyntaxError(TokenRange{ token->index }, std::move(ex_data));
 			}
 
 			return {};
 		}
 
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseIdName(peff::String &nameOut);
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseIdRef(IdRefPtr &idRefOut);
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parse_id_name(peff::String &name_out);
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parse_id_ref(IdRefPtr &id_ref_out);
 
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseExpr(int precedence, AstNodePtr<ExprNode> &exprOut);
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parse_expr(int precedence, AstNodePtr<ExprNode> &expr_out);
 
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseTypeName(AstNodePtr<TypeNameNode> &typeNameOut, bool withCircumfixes);
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parse_type_name(AstNodePtr<TypeNameNode> &type_name_out, bool with_circumfixes);
 
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseVarField(AstNodePtr<VarNode> &varNodeOut);
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseProgramStmt();
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parse_var_field(AstNodePtr<VarNode> &var_node_out);
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parse_program_stmt();
 
 		/// @brief Parse a whole program.
 		/// @return The syntax error that forced the parser to interrupt the parse progress.
 		/// @note Don't forget that there still may be syntax errors emitted even the parse progress is not interrupted.
-		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parseProgram(const AstNodePtr<ModuleNode> &initialMod);
+		[[nodiscard]] INTERBUFC_API std::optional<SyntaxError> parse_program(const AstNodePtr<ModuleNode> &initial_mod);
 	};
 }
 

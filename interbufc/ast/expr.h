@@ -34,17 +34,17 @@ namespace interbufc {
 
 	class ExprNode : public AstNode {
 	public:
-		ExprKind exprKind;
+		ExprKind expr_kind;
 
-		INTERBUFC_API ExprNode(ExprKind exprKind, peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document);
+		INTERBUFC_API ExprNode(ExprKind expr_kind, peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document);
 		INTERBUFC_API virtual ~ExprNode();
 	};
 
 	class IdRefExprNode : public ExprNode {
 	public:
-		IdRefPtr idRefPtr;
+		IdRefPtr id_ref_ptr;
 
-		INTERBUFC_API IdRefExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, IdRefPtr &&idRefPtr);
+		INTERBUFC_API IdRefExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, IdRefPtr &&id_ref_ptr);
 		INTERBUFC_API virtual ~IdRefExprNode();
 	};
 
@@ -52,7 +52,7 @@ namespace interbufc {
 	public:
 		int8_t data;
 
-		INTERBUFC_API I8LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, int8_t data);
+		INTERBUFC_API I8LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, int8_t data);
 		INTERBUFC_API virtual ~I8LiteralExprNode();
 	};
 
@@ -60,7 +60,7 @@ namespace interbufc {
 	public:
 		int16_t data;
 
-		INTERBUFC_API I16LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, int16_t data);
+		INTERBUFC_API I16LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, int16_t data);
 		INTERBUFC_API virtual ~I16LiteralExprNode();
 	};
 
@@ -68,7 +68,7 @@ namespace interbufc {
 	public:
 		int32_t data;
 
-		INTERBUFC_API I32LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, int32_t data);
+		INTERBUFC_API I32LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, int32_t data);
 		INTERBUFC_API virtual ~I32LiteralExprNode();
 	};
 
@@ -76,7 +76,7 @@ namespace interbufc {
 	public:
 		int64_t data;
 
-		INTERBUFC_API I64LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, int64_t data);
+		INTERBUFC_API I64LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, int64_t data);
 		INTERBUFC_API virtual ~I64LiteralExprNode();
 	};
 
@@ -84,7 +84,7 @@ namespace interbufc {
 	public:
 		uint8_t data;
 
-		INTERBUFC_API U8LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, uint8_t data);
+		INTERBUFC_API U8LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, uint8_t data);
 		INTERBUFC_API virtual ~U8LiteralExprNode();
 	};
 
@@ -92,7 +92,7 @@ namespace interbufc {
 	public:
 		uint16_t data;
 
-		INTERBUFC_API U16LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, uint16_t data);
+		INTERBUFC_API U16LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, uint16_t data);
 		INTERBUFC_API virtual ~U16LiteralExprNode();
 	};
 
@@ -100,7 +100,7 @@ namespace interbufc {
 	public:
 		uint32_t data;
 
-		INTERBUFC_API U32LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, uint32_t data);
+		INTERBUFC_API U32LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, uint32_t data);
 		INTERBUFC_API virtual ~U32LiteralExprNode();
 	};
 
@@ -108,7 +108,7 @@ namespace interbufc {
 	public:
 		uint64_t data;
 
-		INTERBUFC_API U64LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, uint64_t data);
+		INTERBUFC_API U64LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, uint64_t data);
 		INTERBUFC_API virtual ~U64LiteralExprNode();
 	};
 
@@ -116,7 +116,7 @@ namespace interbufc {
 	public:
 		float data;
 
-		INTERBUFC_API F32LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, float data);
+		INTERBUFC_API F32LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, float data);
 		INTERBUFC_API virtual ~F32LiteralExprNode();
 	};
 
@@ -124,7 +124,7 @@ namespace interbufc {
 	public:
 		double data;
 
-		INTERBUFC_API F64LiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, double data);
+		INTERBUFC_API F64LiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, double data);
 		INTERBUFC_API virtual ~F64LiteralExprNode();
 	};
 
@@ -132,7 +132,7 @@ namespace interbufc {
 	public:
 		bool data;
 
-		INTERBUFC_API BoolLiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, bool data);
+		INTERBUFC_API BoolLiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, bool data);
 		INTERBUFC_API virtual ~BoolLiteralExprNode();
 	};
 
@@ -140,15 +140,15 @@ namespace interbufc {
 	public:
 		peff::String data;
 
-		INTERBUFC_API StringLiteralExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, peff::String &&data);
+		INTERBUFC_API StringLiteralExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, peff::String &&data);
 		INTERBUFC_API virtual ~StringLiteralExprNode();
 	};
 
 	class BadExprNode : public ExprNode {
 	public:
-		AstNodePtr<ExprNode> incompleteExpr;
+		AstNodePtr<ExprNode> incomplete_expr;
 
-		INTERBUFC_API BadExprNode(peff::Alloc *selfAllocator, const peff::SharedPtr<Document> &document, const AstNodePtr<ExprNode> &incompleteExpr);
+		INTERBUFC_API BadExprNode(peff::Alloc *self_allocator, const peff::SharedPtr<Document> &document, const AstNodePtr<ExprNode> &incomplete_expr);
 		INTERBUFC_API virtual ~BadExprNode();
 	};
 }

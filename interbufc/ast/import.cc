@@ -2,33 +2,33 @@
 
 using namespace interbufc;
 
-INTERBUFC_API AstNodePtr<AstNode> ImportNode::doDuplicate(peff::Alloc *newAllocator) const {
+INTERBUFC_API AstNodePtr<AstNode> ImportNode::do_duplicate(peff::Alloc *new_allocator) const {
 	bool succeeded = false;
-	AstNodePtr<ImportNode> duplicatedNode(makeAstNode<ImportNode>(newAllocator, *this, newAllocator, succeeded));
-	if ((!duplicatedNode) || (!succeeded)) {
+	AstNodePtr<ImportNode> duplicated_node(make_ast_node<ImportNode>(new_allocator, *this, new_allocator, succeeded));
+	if ((!duplicated_node) || (!succeeded)) {
 		return {};
 	}
 
-	return duplicatedNode.castTo<AstNode>();
+	return duplicated_node.cast_to<AstNode>();
 }
 
 INTERBUFC_API ImportNode::ImportNode(
-	peff::Alloc *selfAllocator,
+	peff::Alloc *self_allocator,
 	const AstNodePtr<Document> &document)
-	: MemberNode(AstNodeType::Import, selfAllocator, document) {
+	: MemberNode(AstNodeType::Import, self_allocator, document) {
 }
 
-INTERBUFC_API ImportNode::ImportNode(const ImportNode &rhs, peff::Alloc *allocator, bool &succeededOut) : MemberNode(rhs, allocator, succeededOut) {
-	if (!succeededOut) {
+INTERBUFC_API ImportNode::ImportNode(const ImportNode &rhs, peff::Alloc *allocator, bool &succeeded_out) : MemberNode(rhs, allocator, succeeded_out) {
+	if (!succeeded_out) {
 		return;
 	}
 
-	if (!(idRef = duplicateIdRef(allocator, rhs.idRef.get()))) {
-		succeededOut = false;
+	if (!(id_ref = duplicate_id_ref(allocator, rhs.id_ref.get()))) {
+		succeeded_out = false;
 		return;
 	}
 
-	succeededOut = true;
+	succeeded_out = true;
 }
 
 INTERBUFC_API ImportNode::~ImportNode() {

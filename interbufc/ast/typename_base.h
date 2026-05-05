@@ -27,10 +27,10 @@ namespace interbufc {
 
 	class TypeNameNode : public AstNode {
 	public:
-		TypeNameKind typeNameKind;
+		TypeNameKind type_name_kind;
 
-		INTERBUFC_API TypeNameNode(TypeNameKind typeNameKind, peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API TypeNameNode(const TypeNameNode &rhs, peff::Alloc *selfAllocator);
+		INTERBUFC_API TypeNameNode(TypeNameKind type_name_kind, peff::Alloc *self_allocator, const AstNodePtr<Document> &document);
+		INTERBUFC_API TypeNameNode(const TypeNameNode &rhs, peff::Alloc *self_allocator);
 		INTERBUFC_API virtual ~TypeNameNode();
 	};
 }

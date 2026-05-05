@@ -6,13 +6,13 @@
 namespace interbufc {
 	class ImportNode : public MemberNode {
 	protected:
-		INTERBUFC_API virtual AstNodePtr<AstNode> doDuplicate(peff::Alloc *newAllocator) const override;
+		INTERBUFC_API virtual AstNodePtr<AstNode> do_duplicate(peff::Alloc *new_allocator) const override;
 
 	public:
-		IdRefPtr idRef;
+		IdRefPtr id_ref;
 
-		INTERBUFC_API ImportNode(peff::Alloc *selfAllocator, const AstNodePtr<Document> &document);
-		INTERBUFC_API ImportNode(const ImportNode &rhs, peff::Alloc *allocator, bool &succeededOut);
+		INTERBUFC_API ImportNode(peff::Alloc *self_allocator, const AstNodePtr<Document> &document);
+		INTERBUFC_API ImportNode(const ImportNode &rhs, peff::Alloc *allocator, bool &succeeded_out);
 		INTERBUFC_API virtual ~ImportNode();
 	};
 }
